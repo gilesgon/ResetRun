@@ -124,8 +124,15 @@ export default function ResetRunApp() {
     if (parsedMode && parsedDuration) {
       startRun(parsedMode, parsedDuration)
     }
+
+    // Check for #settings hash to auto-open settings modal
+    if (window.location.hash === '#settings' && isAuthenticated) {
+      setShowSettings(true)
+      // Clear the hash after opening
+      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [isAuthenticated])
 
   function startRun(m: Mode, d: Duration) {
     setMode(m)

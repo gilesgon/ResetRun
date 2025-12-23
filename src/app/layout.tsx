@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import HomeChip from '@/components/home-chip';
 import ResetRunChip from '@/components/reset-run-chip';
+import SettingsChip from '@/components/settings-chip';
 import ProfileChip from '@/components/profile-chip';
 
 export const metadata: Metadata = {
@@ -38,6 +39,7 @@ export default function RootLayout({
         <div className="fixed right-4 top-4 z-50 flex items-center gap-2">
           <HomeChip />
           <ResetRunChip />
+          <SettingsChip />
           <ProfileChip />
         </div>
         {children}
