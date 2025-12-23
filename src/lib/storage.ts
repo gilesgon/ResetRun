@@ -11,7 +11,10 @@ export type Store = {
   runStartDate: string
   dailyGoal: 1 | 2 | 3
   completionsByDate: Record<string, number>
-  completedDates: string[]
+  completedDateKeys: string[]
+  lastCompletionDate: string | null
+  settingsLockedForDate: string | null
+  lastSettingsChangeDate: string | null
   totalResets: number
 }
 
@@ -21,6 +24,7 @@ type CompletionResult = {
   dayIndex: number
   completedDatesLength: number
   completedDayNow: boolean
+  alreadyCompletedToday: boolean
   hitDaySeven: boolean
 }
 
@@ -32,7 +36,7 @@ function pad2(n: number) {
   return n.toString().padStart(2, '0')
 }
 
-function localDateKey(d: Date) {
+export function getLocalDateKey(d: Date = new Date()) {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
 }
 
@@ -47,12 +51,20 @@ function diffDays(startKey: string, endKey: string) {
   return Math.floor((end.getTime() - start.getTime()) / MS_PER_DAY)
 }
 
-function freshStore(todayKey = localDateKey(new Date())): Store {
+export function getNextLocalDateKey(d: Date = new Date()) {
+  const next = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)
+  return getLocalDateKey(next)
+}
+
+function freshStore(todayKey = getLocalDateKey()): Store {
   return {
     runStartDate: todayKey,
     dailyGoal: 1,
     completionsByDate: {},
-    completedDates: [],
+    completedDateKeys: [],
+    lastCompletionDate: null,
+    settingsLockedForDate: null,
+    lastSettingsChangeDate: null,
     totalResets: 0,
   }
 }
@@ -63,20 +75,27 @@ function migrate(raw: any): Store {
       runStartDate: raw.runStartDate,
       dailyGoal: raw.dailyGoal || 1,
       completionsByDate: raw.completionsByDate || {},
-      completedDates: Array.isArray(raw.completedDates) ? raw.completedDates : [],
+      completedDateKeys: Array.isArray(raw.completedDateKeys)
+        ? raw.completedDateKeys
+        : Array.isArray(raw.completedDates)
+          ? raw.completedDates
+          : [],
+      lastCompletionDate: typeof raw.lastCompletionDate === 'string' ? raw.lastCompletionDate : null,
+      settingsLockedForDate: typeof raw.settingsLockedForDate === 'string' ? raw.settingsLockedForDate : null,
+      lastSettingsChangeDate: typeof raw.lastSettingsChangeDate === 'string' ? raw.lastSettingsChangeDate : null,
       totalResets: typeof raw.totalResets === 'number' ? raw.totalResets : 0,
     }
   }
 
   if (raw?.currentRun?.startDate) {
-    const startKey = localDateKey(new Date(raw.currentRun.startDate))
+    const startKey = getLocalDateKey(new Date(raw.currentRun.startDate))
     const dailyGoal = 1
     const completedDates = Array.isArray(raw.currentRun.completedDays)
       ? raw.currentRun.completedDays
           .filter((n: number) => Number.isFinite(n) && n >= 1 && n <= 7)
           .map((n: number) => {
             const d = new Date(new Date(raw.currentRun.startDate).getTime() + (n - 1) * MS_PER_DAY)
-            return localDateKey(d)
+            return getLocalDateKey(d)
           })
       : []
 
@@ -89,7 +108,10 @@ function migrate(raw: any): Store {
       runStartDate: startKey,
       dailyGoal,
       completionsByDate,
-      completedDates,
+      completedDateKeys: completedDates,
+      lastCompletionDate: completedDates[completedDates.length - 1] ?? null,
+      settingsLockedForDate: null,
+      lastSettingsChangeDate: null,
       totalResets: raw?.stats?.totalResets || 0,
     }
   }
@@ -108,6 +130,10 @@ export function loadStore(): Store {
   try {
     const parsed = JSON.parse(raw)
     const s = migrate(parsed)
+    const todayKey = getLocalDateKey()
+    if (s.settingsLockedForDate && s.settingsLockedForDate !== todayKey) {
+      s.settingsLockedForDate = null
+    }
     window.localStorage.setItem(KEY, JSON.stringify(s))
     return s
   } catch {
@@ -131,7 +157,7 @@ export function updateDailyGoal(store: Store, goal: number): Store {
 }
 
 export function recordCompletion(store: Store, completed: boolean): CompletionResult {
-  const todayKey = localDateKey(new Date())
+  const todayKey = getLocalDateKey()
   let runStartDate = store.runStartDate || todayKey
   let dayIndex = diffDays(runStartDate, todayKey)
 
@@ -142,19 +168,24 @@ export function recordCompletion(store: Store, completed: boolean): CompletionRe
       ...store,
       runStartDate,
       completionsByDate: {},
-      completedDates: [],
+      completedDateKeys: [],
+      lastCompletionDate: null,
     }
   }
 
   let completedDayNow = false
+  let alreadyCompletedToday = false
   const completionsByDate = { ...store.completionsByDate }
-  const completedDates = new Set(store.completedDates)
+  const completedDates = new Set(store.completedDateKeys)
 
   if (completed) {
+    if (store.lastCompletionDate === todayKey || completedDates.has(todayKey)) {
+      alreadyCompletedToday = true
+    }
     const nextCount = (completionsByDate[todayKey] || 0) + 1
     completionsByDate[todayKey] = nextCount
 
-    if (nextCount >= store.dailyGoal && !completedDates.has(todayKey)) {
+    if (!alreadyCompletedToday && nextCount >= store.dailyGoal && !completedDates.has(todayKey)) {
       completedDates.add(todayKey)
       completedDayNow = true
     }
@@ -165,7 +196,8 @@ export function recordCompletion(store: Store, completed: boolean): CompletionRe
     ...store,
     runStartDate,
     completionsByDate,
-    completedDates: completedDatesArr,
+    completedDateKeys: completedDatesArr,
+    lastCompletionDate: completed ? (alreadyCompletedToday ? store.lastCompletionDate : todayKey) : store.lastCompletionDate,
     totalResets: store.totalResets + (completed ? 1 : 0),
   }
 
@@ -177,12 +209,40 @@ export function recordCompletion(store: Store, completed: boolean): CompletionRe
     dayIndex,
     completedDatesLength: completedDatesArr.length,
     completedDayNow,
+    alreadyCompletedToday,
     hitDaySeven: completedDayNow && completedDatesArr.length === 7,
   }
 }
 
 export function getDayIndex(runStartDate: string, dateKey: string) {
   return diffDays(runStartDate, dateKey) + 1
+}
+
+export function lockSettingsForToday(store: Store): Store {
+  const todayKey = getLocalDateKey()
+  const updated: Store = {
+    ...store,
+    settingsLockedForDate: todayKey,
+    lastSettingsChangeDate: todayKey,
+  }
+  saveStore(updated)
+  return updated
+}
+
+export function resetRun(store: Store): Store {
+  const todayKey = getLocalDateKey()
+  const updated: Store = {
+    ...store,
+    runStartDate: todayKey,
+    completionsByDate: {},
+    completedDateKeys: [],
+    lastCompletionDate: null,
+    settingsLockedForDate: null,
+    lastSettingsChangeDate: null,
+    totalResets: 0,
+  }
+  saveStore(updated)
+  return updated
 }
 
 export function saveGoals(goals: UserGoals) {
