@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Wind, Target, Sparkles, Dumbbell, Check, Share2, Pause, Play, X, Settings } from 'lucide-react'
+import { Wind, Target, Sparkles, Dumbbell, Check, Share2, Pause, Play, X } from 'lucide-react'
 import confetti from 'canvas-confetti'
 import { onAuthStateChanged } from 'firebase/auth'
 import { getFirebaseAuth } from '@/lib/firebase'
@@ -269,23 +269,12 @@ export default function ResetRunApp() {
       <div className="mx-auto max-w-md px-5 py-8">
         {screen === 'home' && (
           <>
-            <div className="mb-6 flex items-start justify-between">
-              <div>
-                <h1 className="text-3xl font-black tracking-tight">RESET RUN</h1>
-                <p className="text-white/50 mt-1">Day {day} of 7</p>
-                {goals?.dailyResets ? (
-                  <p className="text-white/35 mt-1 text-sm">Daily goal: {goals.dailyResets} reset{goals.dailyResets > 1 ? 's' : ''}</p>
-                ) : null}
-              </div>
-              {isAuthenticated && (
-                <button
-                  onClick={() => setShowSettings(true)}
-                  className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-                  aria-label="Settings"
-                >
-                  <Settings className="w-5 h-5" />
-                </button>
-              )}
+            <div className="mb-6">
+              <h1 className="text-3xl font-black tracking-tight">RESET RUN</h1>
+              <p className="text-white/50 mt-1">Day {day} of 7</p>
+              {goals?.dailyResets ? (
+                <p className="text-white/35 mt-1 text-sm">Daily goal: {goals.dailyResets} reset{goals.dailyResets > 1 ? 's' : ''}</p>
+              ) : null}
             </div>
 
             <div className="flex gap-2 mb-8">
