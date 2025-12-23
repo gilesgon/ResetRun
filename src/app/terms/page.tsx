@@ -20,9 +20,10 @@ export default function TermsPage() {
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-xl font-semibold">Accounts and waitlist</h2>
+          <h2 className="text-xl font-semibold">Accounts and Pro updates</h2>
           <p className="text-white/75">
-            If you join the waitlist, you consent to being contacted about early access and product updates.
+            Reset Run is publicly available. Pro features may be added in the future. If you sign up for Pro updates,
+            you consent to receiving emails about Pro features. You may unsubscribe at any time.
           </p>
         </div>
 

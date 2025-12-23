@@ -19,6 +19,7 @@ import {
 } from 'firebase/auth'
 import { Eye, EyeOff } from 'lucide-react'
 import { getFirebaseAuth, firebaseConfigError } from '@/lib/firebase'
+import { getFirebaseUnavailableMessage } from '@/lib/env'
 
 export default function LoginClient() {
   const router = useRouter()
@@ -105,18 +106,16 @@ export default function LoginClient() {
   }
 
   if (firebaseConfigError || !getFirebaseAuth()) {
+    const fallback = getFirebaseUnavailableMessage()
     return (
       <main className="min-h-screen bg-black text-white px-6 py-10">
         <div className="mx-auto max-w-md">
-          <h1 className="text-3xl font-black tracking-tight">Accounts are in early access</h1>
-          <p className="text-white/50 mt-2">Cloud accounts are invite-only at the moment.</p>
-          <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">
-            Join the waitlist to request access and be notified when accounts open.
-          </div>
+          <h1 className="text-3xl font-black tracking-tight">{fallback.title}</h1>
+          <p className="text-white/50 mt-2">{fallback.body}</p>
           <div className="mt-6 flex gap-3">
-            <a href="/#waitlist" className="inline-block px-5 py-3 bg-white text-black rounded-full font-bold">
-              Join Waitlist
-            </a>
+            <Link href={fallback.ctaLink} className="inline-block px-5 py-3 bg-white text-black rounded-full font-bold">
+              {fallback.cta}
+            </Link>
             <Link href="/" className="inline-block px-4 py-3 text-sm text-white/60 hover:text-white">
               Back to home
             </Link>
@@ -128,8 +127,11 @@ export default function LoginClient() {
 
   if (!ready) {
     return (
-      <div className="min-h-screen bg-black text-white/60 flex items-center justify-center px-6">
-        Loading…
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6 gap-6">
+        <div className="text-white/60">Loading account…</div>
+        <Link href="/app" className="px-5 py-3 text-sm text-white/60 hover:text-white border border-white/20 rounded-full">
+          Start without account
+        </Link>
       </div>
     )
   }

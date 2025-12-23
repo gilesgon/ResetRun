@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, Wind, Target, Sparkles, Dumbbell, Check } fr
 import Link from 'next/link';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirebaseAuth, firebaseConfigError } from '@/lib/firebase';
+import { getFirebaseUnavailableMessage } from '@/lib/env';
 import { Mode, Duration, modeNames } from '@/lib/protocols';
 import { saveGoals, UserGoals } from '@/lib/storage';
 
@@ -50,18 +51,19 @@ export default function SignupPage() {
   }, [router]);
 
   if (firebaseConfigError || !getFirebaseAuth()) {
+    const fallback = getFirebaseUnavailableMessage();
     return (
       <div className="min-h-screen bg-black text-white px-6 flex items-center justify-center">
         <div className="max-w-md w-full">
-          <h1 className="text-2xl font-bold">Accounts are in early access</h1>
-          <p className="text-white/50 mt-2">Accounts and cloud sync are currently invite-only.</p>
-          <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">
-            Join the waitlist to request access and be notified when accounts open.
-          </div>
-          <div className="mt-6">
-            <a href="/#waitlist" className="inline-block px-5 py-3 bg-white text-black rounded-full font-bold">
-              Join Waitlist
-            </a>
+          <h1 className="text-2xl font-bold">{fallback.title}</h1>
+          <p className="text-white/50 mt-2">{fallback.body}</p>
+          <div className="mt-6 flex gap-3">
+            <Link href={fallback.ctaLink} className="inline-block px-5 py-3 bg-white text-black rounded-full font-bold">
+              {fallback.cta}
+            </Link>
+            <Link href="/" className="inline-block px-4 py-3 text-sm text-white/60 hover:text-white">
+              Back to home
+            </Link>
           </div>
         </div>
       </div>
@@ -70,8 +72,11 @@ export default function SignupPage() {
 
   if (!authReady) {
     return (
-      <div className="min-h-screen bg-black text-white/60 flex items-center justify-center">
-        Loading…
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6 gap-6">
+        <div className="text-white/60">Loading account…</div>
+        <Link href="/app" className="px-5 py-3 text-sm text-white/60 hover:text-white border border-white/20 rounded-full">
+          Start without account
+        </Link>
       </div>
     );
   }

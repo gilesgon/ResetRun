@@ -7,14 +7,14 @@ export default function PrivacyPage() {
 
         <p className="text-white/80">
           Reset Run is designed to be lightweight and privacy‑respecting. We store your progress locally on your
-          device. If you join the waitlist, we store your email (and any optional details you provide) to contact
-          you about early access.
+          device. If you sign up for Pro updates, we store your email (and any optional details you provide) to contact
+          you about Pro features.
         </p>
 
         <div className="space-y-3">
           <h2 className="text-xl font-semibold">What we collect</h2>
           <ul className="text-white/75 list-disc pl-5 space-y-2">
-            <li>Waitlist email (required for waitlist).</li>
+            <li>Email address (required for Pro updates).</li>
             <li>Optional details you provide (first name, last name, phone).</li>
             <li>Local progress data stored on your device (not sent to us).</li>
           </ul>
@@ -23,7 +23,7 @@ export default function PrivacyPage() {
         <div className="space-y-3">
           <h2 className="text-xl font-semibold">How we use it</h2>
           <ul className="text-white/75 list-disc pl-5 space-y-2">
-            <li>To contact you about early access and product updates.</li>
+            <li>To contact you about Pro features and product updates.</li>
             <li>To improve the product experience.</li>
           </ul>
         </div>
@@ -31,7 +31,7 @@ export default function PrivacyPage() {
         <div className="space-y-3">
           <h2 className="text-xl font-semibold">Data retention</h2>
           <p className="text-white/75">
-            Waitlist data is retained until it is no longer needed for early access onboarding or you request removal.
+            Pro update subscriber data is retained until you unsubscribe or request removal.
           </p>
         </div>
 

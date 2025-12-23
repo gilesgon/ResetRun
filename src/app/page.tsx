@@ -56,7 +56,7 @@ export default function LandingPage() {
     }
     const firebaseDb = getFirebaseDb();
     if (!firebaseDb || firebaseConfigError) {
-      setErrorMessage('Waitlist is not configured yet.');
+      setErrorMessage('Pro updates are temporarily unavailable. Please try again later.');
       setFormStatus('error');
       return;
     }
@@ -201,8 +201,8 @@ export default function LandingPage() {
         </motion.div>
       </div>
 
-      {/* Waitlist / CTA */}
-      <div id="waitlist" className="container mx-auto px-6 py-16 max-w-2xl">
+      {/* Pro Updates CTA */}
+      <div id="pro-updates" className="container mx-auto px-6 py-16 max-w-2xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -212,7 +212,7 @@ export default function LandingPage() {
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Pro Accounts</h2>
           <p className="text-gray-400">
             Sync across devices and set goals.
-            Join the waitlist for early access.
+            Get notified when Pro features launch.
           </p>
         </motion.div>
 
@@ -234,7 +234,7 @@ export default function LandingPage() {
               type="submit"
               className="tap-target px-6 py-3 bg-white text-black font-bold rounded-full hover:bg-gray-200 active:scale-95 transition-all"
             >
-              Join Waitlist
+              Get Pro Updates
             </button>
           </div>
 
@@ -288,7 +288,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="py-8 text-center text-gray-600 text-sm border-t border-gray-900 safe-bottom">
-        <div>Made with intention. Waitlist details stored for early access.</div>
+        <div>Made with intention. <a href="mailto:support@resetrun.app" className="hover:text-gray-300">support@resetrun.app</a></div>
         <div className="mt-2 flex items-center justify-center gap-4 text-gray-500">
           <a href="/privacy" className="hover:text-gray-300">Privacy</a>
           <a href="/terms" className="hover:text-gray-300">Terms</a>
