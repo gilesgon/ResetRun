@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Wind, Target, Sparkles, Dumbbell, Check, Share2, Pause, Play, X } from 'lucide-react'
+import { Wind, Target, Sparkles, Dumbbell, Check, Share2, Pause, Play, X, Settings } from 'lucide-react'
 import confetti from 'canvas-confetti'
+import { onAuthStateChanged } from 'firebase/auth'
+import { getFirebaseAuth } from '@/lib/firebase'
 import { getProtocol, type Mode, type Duration, modeNames, modeColors } from '@/lib/protocols'
 import {
   getDayIndex,
@@ -10,6 +12,7 @@ import {
   loadStore,
   recordCompletion,
   updateDailyGoal,
+  saveGoals,
   type Store,
   type UserGoals,
 } from '@/lib/storage'
@@ -50,7 +53,9 @@ export default function ResetRunApp() {
   const [screen, setScreen] = useState<Screen>('home')
   const [store, setStore] = useState<Store | null>(null)
   const [showFallback, setShowFallback] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [goals, setGoals] = useState<UserGoals | null>(null)
 
   const [mode, setMode] = useState<Mode>('focus')
@@ -62,6 +67,19 @@ export default function ResetRunApp() {
   const [stepIndex, setStepIndex] = useState(0)
   const [seconds, setSeconds] = useState(0)
   const [paused, setPaused] = useState(false)
+
+  // Check authentication status
+  useEffect(() => {
+    const auth = getFirebaseAuth()
+    if (!auth) {
+      setIsAuthenticated(false)
+      return
+    }
+    const unsub = onAuthStateChanged(auth, (user) => {
+      setIsAuthenticated(!!user)
+    })
+    return () => unsub()
+  }, [])
 
   // Load store once
   useEffect(() => {
@@ -77,14 +95,14 @@ export default function ResetRunApp() {
     return () => window.clearTimeout(id)
   }, [store])
 
-  // Apply saved onboarding defaults (if present)
+  // Apply saved onboarding defaults (ONLY for authenticated users)
   useEffect(() => {
-    const g = loadGoals()
+    const g = loadGoals(isAuthenticated)
     setGoals(g)
     if (!g) return
     if (g.preferredModes?.[0]) setMode(g.preferredModes[0])
     if (g.preferredDuration) setDuration(g.preferredDuration)
-  }, [])
+  }, [isAuthenticated])
 
   useEffect(() => {
     if (!store || !goals) return
@@ -244,12 +262,23 @@ export default function ResetRunApp() {
       <div className="mx-auto max-w-md px-5 py-8">
         {screen === 'home' && (
           <>
-            <div className="mb-6">
-              <h1 className="text-3xl font-black tracking-tight">RESET RUN</h1>
-              <p className="text-white/50 mt-1">Day {day} of 7</p>
-              {goals?.dailyResets ? (
-                <p className="text-white/35 mt-1 text-sm">Daily goal: {goals.dailyResets} reset{goals.dailyResets > 1 ? 's' : ''}</p>
-              ) : null}
+            <div className="mb-6 flex items-start justify-between">
+              <div>
+                <h1 className="text-3xl font-black tracking-tight">RESET RUN</h1>
+                <p className="text-white/50 mt-1">Day {day} of 7</p>
+                {goals?.dailyResets ? (
+                  <p className="text-white/35 mt-1 text-sm">Daily goal: {goals.dailyResets} reset{goals.dailyResets > 1 ? 's' : ''}</p>
+                ) : null}
+              </div>
+              {isAuthenticated && (
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                  aria-label="Settings"
+                >
+                  <Settings className="w-5 h-5" />
+                </button>
+              )}
             </div>
 
             <div className="flex gap-2 mb-8">
@@ -369,6 +398,157 @@ export default function ResetRunApp() {
                   Done
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Settings Modal */}
+        {showSettings && isAuthenticated && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 px-6">
+            <div className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border border-white/10">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold">Settings</h2>
+                <button
+                  onClick={() => setShowSettings(false)}
+                  className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                  aria-label="Close settings"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Mode Selection */}
+                <div>
+                  <h3 className="font-semibold mb-3">Select Modes to Display</h3>
+                  <div className="space-y-2">
+                    {(Object.keys(MODE_META) as Mode[]).map((m) => {
+                      const MIcon = MODE_META[m].icon
+                      const isSelected = goals?.preferredModes?.includes(m) ?? true
+                      return (
+                        <label
+                          key={m}
+                          className="flex items-center gap-3 p-3 rounded-xl border border-white/10 hover:bg-white/5 cursor-pointer transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              const currentModes = goals?.preferredModes?.length
+                                ? goals.preferredModes
+                                : (Object.keys(MODE_META) as Mode[])
+
+                              let newModes: Mode[]
+                              if (e.target.checked) {
+                                newModes = [...currentModes, m]
+                              } else {
+                                newModes = currentModes.filter((mode) => mode !== m)
+                              }
+
+                              // Ensure at least one mode is selected
+                              if (newModes.length === 0) return
+
+                              const updatedGoals: UserGoals = {
+                                dailyResets: goals?.dailyResets ?? 1,
+                                preferredModes: newModes,
+                                preferredDuration: goals?.preferredDuration ?? 5,
+                                reminderTime: goals?.reminderTime ?? null,
+                              }
+                              saveGoals(updatedGoals)
+                              setGoals(updatedGoals)
+                            }}
+                            className="w-5 h-5 rounded accent-white"
+                          />
+                          <div className={`w-10 h-10 rounded-lg ${modeColors[m].solid} flex items-center justify-center`}>
+                            <MIcon className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-semibold">{modeNames[m]}</div>
+                            <div className="text-white/40 text-xs">{MODE_META[m].tagline}</div>
+                          </div>
+                        </label>
+                      )
+                    })}
+                  </div>
+                  <p className="text-xs text-white/40 mt-2">Select at least one mode</p>
+                </div>
+
+                {/* Daily Goal */}
+                <div>
+                  <h3 className="font-semibold mb-3">Daily Reset Goal</h3>
+                  <div className="flex gap-2">
+                    {[1, 2, 3].map((num) => (
+                      <button
+                        key={num}
+                        onClick={() => {
+                          const updatedGoals: UserGoals = {
+                            dailyResets: num,
+                            preferredModes: goals?.preferredModes?.length
+                              ? goals.preferredModes
+                              : (Object.keys(MODE_META) as Mode[]),
+                            preferredDuration: goals?.preferredDuration ?? 5,
+                            reminderTime: goals?.reminderTime ?? null,
+                          }
+                          saveGoals(updatedGoals)
+                          setGoals(updatedGoals)
+
+                          // Update store with new daily goal
+                          if (store) {
+                            const updated = updateDailyGoal(store, num)
+                            if (updated !== store) setStore(updated)
+                          }
+                        }}
+                        className={`flex-1 py-3 rounded-xl font-semibold transition-colors ${
+                          (goals?.dailyResets ?? 1) === num
+                            ? 'bg-white text-black'
+                            : 'border border-white/15 bg-white/5 hover:bg-white/10'
+                        }`}
+                      >
+                        {num} reset{num > 1 ? 's' : ''}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Preferred Duration */}
+                <div>
+                  <h3 className="font-semibold mb-3">Preferred Duration</h3>
+                  <div className="flex gap-2">
+                    {DURATIONS.map((d) => (
+                      <button
+                        key={d}
+                        onClick={() => {
+                          const updatedGoals: UserGoals = {
+                            dailyResets: goals?.dailyResets ?? 1,
+                            preferredModes: goals?.preferredModes?.length
+                              ? goals.preferredModes
+                              : (Object.keys(MODE_META) as Mode[]),
+                            preferredDuration: d,
+                            reminderTime: goals?.reminderTime ?? null,
+                          }
+                          saveGoals(updatedGoals)
+                          setGoals(updatedGoals)
+                          setDuration(d)
+                        }}
+                        className={`flex-1 py-3 rounded-xl font-semibold transition-colors ${
+                          (goals?.preferredDuration ?? 5) === d
+                            ? 'bg-white text-black'
+                            : 'border border-white/15 bg-white/5 hover:bg-white/10'
+                        }`}
+                      >
+                        {d} min
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowSettings(false)}
+                className="w-full mt-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-colors"
+              >
+                Done
+              </button>
             </div>
           </div>
         )}
