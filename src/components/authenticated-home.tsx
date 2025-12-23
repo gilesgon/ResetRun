@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { Wind, Target, Sparkles, Dumbbell, TrendingUp, Zap, Lock } from 'lucide-react'
 import { loadStore, type Store } from '@/lib/storage'
 import { type Mode, modeNames, modeColors } from '@/lib/protocols'
-import ProfileChip from '@/components/profile-chip'
 
 const MODE_META: Record<Mode, { icon: any; tagline: string }> = {
   calm: { icon: Wind, tagline: 'Regain composure' },
@@ -37,13 +36,7 @@ export default function AuthenticatedHome() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="mx-auto max-w-4xl px-5 py-8">
-        {/* Top Bar */}
-        <div className="flex items-center justify-between mb-8">
-          <Link href="/" className="text-xl font-black tracking-tight">RESET RUN</Link>
-          <ProfileChip />
-        </div>
-
+      <div className="mx-auto max-w-4xl px-5 py-8 pt-20">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-black tracking-tight mb-2">Welcome back</h1>
