@@ -7,6 +7,8 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+
 import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
@@ -103,14 +105,19 @@ export default function LoginClient() {
     return (
       <main className="min-h-screen bg-black text-white px-6 py-10">
         <div className="mx-auto max-w-md">
-          <h1 className="text-3xl font-black tracking-tight">Create account</h1>
-          <p className="text-white/50 mt-2">Firebase isn’t configured yet.</p>
-          <pre className="mt-6 whitespace-pre-wrap rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-white/70">
-            {firebaseConfigError || 'Missing Firebase config'}
-          </pre>
-          <p className="text-sm text-white/50 mt-6">
-            Copy <code>.env.local.example</code> to <code>.env.local</code> and fill in your Firebase web app values.
-          </p>
+          <h1 className="text-3xl font-black tracking-tight">Accounts are in early access</h1>
+          <p className="text-white/50 mt-2">Cloud accounts are invite-only at the moment.</p>
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">
+            Join the waitlist to request access and be notified when accounts open.
+          </div>
+          <div className="mt-6 flex gap-3">
+            <a href="/#waitlist" className="inline-block px-5 py-3 bg-white text-black rounded-full font-bold">
+              Join Waitlist
+            </a>
+            <Link href="/" className="inline-block px-4 py-3 text-sm text-white/60 hover:text-white">
+              Back to home
+            </Link>
+          </div>
         </div>
       </main>
     )
