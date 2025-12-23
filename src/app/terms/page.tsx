@@ -35,7 +35,7 @@ export default function TermsPage() {
 
         <div className="space-y-3">
           <h2 className="text-xl font-semibold">Contact</h2>
-          <p className="text-white/75">Email us if you have questions about these terms.</p>
+          <p className="text-white/75">Email us at <a href="mailto:support@resetrun.app" className="text-white/70 underline">support@resetrun.app</a> if you have questions about these terms.</p>
         </div>
       </div>
     </main>

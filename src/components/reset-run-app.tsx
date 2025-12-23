@@ -49,6 +49,7 @@ function localDateKey(d: Date) {
 export default function ResetRunApp() {
   const [screen, setScreen] = useState<Screen>('home')
   const [store, setStore] = useState<Store | null>(null)
+  const [showFallback, setShowFallback] = useState(false)
 
   const [goals, setGoals] = useState<UserGoals | null>(null)
 
@@ -67,6 +68,14 @@ export default function ResetRunApp() {
     const s = loadStore()
     setStore(s)
   }, [])
+
+  // If store hasn't arrived after a short delay, show a fallback CTA
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      if (!store) setShowFallback(true)
+    }, 2500)
+    return () => window.clearTimeout(id)
+  }, [store])
 
   // Apply saved onboarding defaults (if present)
   useEffect(() => {
@@ -182,7 +191,32 @@ export default function ResetRunApp() {
   }
 
   if (!store) {
-    return <div className="min-h-screen bg-black text-white/60 flex items-center justify-center">Loading…</div>
+    return (
+      <div className="min-h-screen bg-black text-white/60 flex items-center justify-center px-6">
+        <div className="max-w-md text-center">
+          <div className="text-lg font-semibold mb-4">Loading…</div>
+          {showFallback ? (
+            <div className="space-y-3">
+              <p className="text-white/70">The app is taking longer than expected to load.</p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    const s = loadStore()
+                    setStore(s)
+                  }}
+                  className="w-full py-3 bg-white text-black font-bold rounded-xl"
+                >
+                  Start a reset anyway
+                </button>
+                <a href="/" className="inline-block text-sm text-white/60 hover:text-white">
+                  Back to home
+                </a>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    )
   }
 
   const todayKey = localDateKey(new Date())

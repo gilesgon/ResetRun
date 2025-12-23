@@ -52,11 +52,16 @@ export default function SignupPage() {
     return (
       <div className="min-h-screen bg-black text-white px-6 flex items-center justify-center">
         <div className="max-w-md w-full">
-          <h1 className="text-2xl font-bold">Create account</h1>
-          <p className="text-white/50 mt-2">Firebase isn’t configured yet.</p>
-          <pre className="mt-6 whitespace-pre-wrap rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-white/70">
-            {firebaseConfigError || 'Missing Firebase config'}
-          </pre>
+          <h1 className="text-2xl font-bold">Accounts are in early access</h1>
+          <p className="text-white/50 mt-2">Accounts and cloud sync are currently invite-only.</p>
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">
+            Join the waitlist to request access and be notified when accounts open.
+          </div>
+          <div className="mt-6">
+            <a href="/#waitlist" className="inline-block px-5 py-3 bg-white text-black rounded-full font-bold">
+              Join Waitlist
+            </a>
+          </div>
         </div>
       </div>
     );

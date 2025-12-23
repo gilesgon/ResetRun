@@ -37,7 +37,7 @@ export default function PrivacyPage() {
 
         <div className="space-y-3">
           <h2 className="text-xl font-semibold">Contact</h2>
-          <p className="text-white/75">Email us if you have questions or want your data removed.</p>
+          <p className="text-white/75">Email us at <a href="mailto:support@resetrun.app" className="text-white/70 underline">support@resetrun.app</a> if you have questions or want your data removed.</p>
         </div>
       </div>
     </main>
