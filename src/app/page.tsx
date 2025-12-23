@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Wind, Target, Sparkles, Dumbbell } from 'lucide-react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { getFirebaseDb, firebaseConfigError } from '@/lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { getFirebaseDb, getFirebaseAuth, firebaseConfigError } from '@/lib/firebase';
+import AuthenticatedHome from '@/components/authenticated-home';
 
 const modes = [
   {
@@ -39,6 +41,8 @@ const modes = [
 ];
 
 export default function LandingPage() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -46,6 +50,20 @@ export default function LandingPage() {
   const [showDetails, setShowDetails] = useState(false);
   const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Check authentication status
+  useEffect(() => {
+    const auth = getFirebaseAuth();
+    if (!auth) {
+      setAuthChecked(true);
+      return;
+    }
+    const unsub = onAuthStateChanged(auth, (user) => {
+      setIsAuthenticated(!!user);
+      setAuthChecked(true);
+    });
+    return () => unsub();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,6 +121,21 @@ export default function LandingPage() {
     }
   };
 
+  // Show loading state while checking auth
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-white/60">Loading...</div>
+      </div>
+    );
+  }
+
+  // Show authenticated home for logged-in users
+  if (isAuthenticated) {
+    return <AuthenticatedHome />;
+  }
+
+  // Show landing page for guests
   return (
     <div className="min-h-screen">
       {/* Hero */}
