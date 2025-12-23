@@ -4,7 +4,7 @@
     "indexes": "firestore.indexes.json"
   },
   "apphosting": {
-    "backendId": "resetrun",
+    "backendId": "rrbackend",
     "rootDir": ".",
     "ignore": [
       "node_modules",
