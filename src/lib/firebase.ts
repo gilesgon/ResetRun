@@ -1,6 +1,7 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
 import { getAuth, type Auth } from 'firebase/auth'
 import { getFirestore, type Firestore } from 'firebase/firestore'
+import { isFirebaseConfigured } from './env'
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -9,13 +10,8 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-const missing = Object.entries(firebaseConfig)
-  .filter(([, v]) => !v)
-  .map(([k]) => k)
-
-export const firebaseConfigError = missing.length
-  ? `Missing Firebase env vars: ${missing.join(', ')}. Create a .env.local file (see .env.local.example).`
-  : null
+// Check if Firebase is configured (logs only in development)
+export const firebaseConfigError = !isFirebaseConfigured() ? 'Firebase unavailable' : null
 
 // Lazy initialization - only runs in browser/runtime, prevents SSR/prerender issues
 let app: FirebaseApp | null = null

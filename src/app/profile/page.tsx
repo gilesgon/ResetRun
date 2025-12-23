@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth'
 import { getFirebaseAuth, firebaseConfigError } from '@/lib/firebase'
+import { getFirebaseUnavailableMessage } from '@/lib/env'
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null)
@@ -26,18 +27,19 @@ export default function ProfilePage() {
   }
 
   if (firebaseConfigError || !getFirebaseAuth()) {
+    const fallback = getFirebaseUnavailableMessage()
     return (
       <main className="min-h-screen bg-black text-white px-6 py-10">
         <div className="mx-auto max-w-md">
-          <h1 className="text-3xl font-black tracking-tight">Accounts are in early access</h1>
-          <p className="text-white/50 mt-2">Cloud accounts are invite-only for now.</p>
-          <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">
-            If you'd like access, join the waitlist and we'll notify you when accounts open.
-          </div>
-          <div className="mt-6">
-            <a href="/#waitlist" className="inline-block px-5 py-3 bg-white text-black rounded-full font-bold">
-              Join Waitlist
-            </a>
+          <h1 className="text-3xl font-black tracking-tight">{fallback.title}</h1>
+          <p className="text-white/50 mt-2">{fallback.body}</p>
+          <div className="mt-6 flex gap-3">
+            <Link href={fallback.ctaLink} className="inline-block px-5 py-3 bg-white text-black rounded-full font-bold">
+              {fallback.cta}
+            </Link>
+            <Link href="/" className="inline-block px-4 py-3 text-sm text-white/60 hover:text-white">
+              Back to home
+            </Link>
           </div>
         </div>
       </main>
@@ -46,8 +48,11 @@ export default function ProfilePage() {
 
   if (!ready) {
     return (
-      <div className="min-h-screen bg-black text-white/60 flex items-center justify-center px-6">
-        Loading...
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6 gap-6">
+        <div className="text-white/60">Loading profile…</div>
+        <Link href="/app" className="px-5 py-3 text-sm text-white/60 hover:text-white border border-white/20 rounded-full">
+          Start a reset
+        </Link>
       </div>
     )
   }
