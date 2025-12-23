@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   GoogleAuthProvider,
@@ -15,7 +15,7 @@ import {
 import { Eye, EyeOff } from 'lucide-react'
 import { auth, firebaseConfigError } from '@/lib/firebase'
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter()
   const search = useSearchParams()
 
@@ -208,5 +208,13 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black text-white/60 flex items-center justify-center px-6">Loading…</div>}>
+      <LoginContent />
+    </Suspense>
   )
 }
