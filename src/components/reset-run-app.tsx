@@ -8,10 +8,13 @@ import { getFirebaseAuth } from '@/lib/firebase'
 import { getProtocol, type Mode, type Duration, modeNames, modeColors } from '@/lib/protocols'
 import { useSettings } from '@/components/settings-context'
 import {
+  getLocalDateKey,
   getDayIndex,
   loadGoals,
   loadStore,
+  lockSettingsForToday,
   recordCompletion,
+  resetRun,
   updateDailyGoal,
   saveGoals,
   type Store,
@@ -43,21 +46,18 @@ function isDuration(x: any): x is Duration {
   return x === 2 || x === 5 || x === 10
 }
 
-function localDateKey(d: Date) {
-  const y = d.getFullYear()
-  const m = (d.getMonth() + 1).toString().padStart(2, '0')
-  const day = d.getDate().toString().padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
-
 export default function ResetRunApp() {
   const { showSettings, openSettings, closeSettings } = useSettings()
   const [screen, setScreen] = useState<Screen>('home')
   const [store, setStore] = useState<Store | null>(null)
   const [showFallback, setShowFallback] = useState(false)
+  const [completionNotice, setCompletionNotice] = useState<string | null>(null)
+  const [resetStep, setResetStep] = useState<'idle' | 'confirm' | 'typing'>('idle')
+  const [resetText, setResetText] = useState('')
 
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [goals, setGoals] = useState<UserGoals | null>(null)
+  const [draftGoals, setDraftGoals] = useState<UserGoals | null>(null)
 
   const [mode, setMode] = useState<Mode>('focus')
   const [duration, setDuration] = useState<Duration>(5)
@@ -92,7 +92,7 @@ export default function ResetRunApp() {
   useEffect(() => {
     const id = window.setTimeout(() => {
       if (!store) setShowFallback(true)
-    }, 2500)
+    }, 3000)
     return () => window.clearTimeout(id)
   }, [store])
 
@@ -100,16 +100,38 @@ export default function ResetRunApp() {
   useEffect(() => {
     const g = loadGoals(isAuthenticated)
     setGoals(g)
+    setDraftGoals(g)
     if (!g) return
     if (g.preferredModes?.[0]) setMode(g.preferredModes[0])
     if (g.preferredDuration) setDuration(g.preferredDuration)
   }, [isAuthenticated])
 
   useEffect(() => {
+    if (goals) setDraftGoals(goals)
+  }, [goals])
+
+  useEffect(() => {
     if (!store || !goals) return
     const updated = updateDailyGoal(store, goals.dailyResets)
     if (updated !== store) setStore(updated)
   }, [store, goals])
+
+  useEffect(() => {
+    if (!store || screen !== 'player') return
+    const todayKey = getLocalDateKey()
+    const lockedToday =
+      store.settingsLockedForDate === todayKey || store.lastSettingsChangeDate === todayKey
+    if (!lockedToday) {
+      setStore(lockSettingsForToday(store))
+    }
+  }, [store, screen])
+
+  useEffect(() => {
+    if (showSettings) return
+    setResetStep('idle')
+    setResetText('')
+    if (goals) setDraftGoals(goals)
+  }, [showSettings, goals])
 
   // Deep-link: /app?mode=calm&duration=5
   useEffect(() => {
@@ -136,10 +158,19 @@ export default function ResetRunApp() {
   }, [isAuthenticated])
 
   function startRun(m: Mode, d: Duration) {
+    if (store) {
+      const todayKey = getLocalDateKey()
+      const lockedToday =
+        store.settingsLockedForDate === todayKey || store.lastSettingsChangeDate === todayKey
+      if (!lockedToday) {
+        setStore(lockSettingsForToday(store))
+      }
+    }
     setMode(m)
     setDuration(d)
     setPaused(false)
     setStepIndex(0)
+    setCompletionNotice(null)
 
     const p = getProtocol(m, d)
     const first = p?.steps?.[0]
@@ -198,6 +229,7 @@ export default function ResetRunApp() {
     }
     const result = recordCompletion(store, true)
     setStore(result.store)
+    setCompletionNotice(result.alreadyCompletedToday ? 'Completed for today.' : null)
     setScreen('done')
     if (result.hitDaySeven) {
       confetti({ particleCount: 160, spread: 70, origin: { y: 0.6 } })
@@ -220,7 +252,7 @@ export default function ResetRunApp() {
     return (
       <div className="min-h-screen bg-black text-white/60 flex items-center justify-center px-6">
         <div className="max-w-md text-center">
-          <div className="text-lg font-semibold mb-4">Loading…</div>
+          <div className="text-lg font-semibold mb-4">Loading...</div>
           {showFallback ? (
             <div className="space-y-3">
               <p className="text-white/70">The app is taking longer than expected to load.</p>
@@ -232,7 +264,7 @@ export default function ResetRunApp() {
                   }}
                   className="w-full py-3 bg-white text-black font-bold rounded-xl"
                 >
-                  Start a reset anyway
+                  Start Reset
                 </button>
                 <a href="/" className="inline-block text-sm text-white/60 hover:text-white">
                   Back to home
@@ -245,11 +277,13 @@ export default function ResetRunApp() {
     )
   }
 
-  const todayKey = localDateKey(new Date())
+  const todayKey = getLocalDateKey()
   const dayIndex = getDayIndex(store.runStartDate, todayKey)
   const day = Math.min(Math.max(dayIndex, 1), 7)
+  const isLockedToday =
+    store.settingsLockedForDate === todayKey || store.lastSettingsChangeDate === todayKey
   const completedIndices = new Set(
-    store.completedDates
+    store.completedDateKeys
       .map((key) => getDayIndex(store.runStartDate, key))
       .filter((n) => n >= 1 && n <= 7)
   )
@@ -264,6 +298,16 @@ export default function ResetRunApp() {
     screen === 'player' || screen === 'done'
       ? `min-h-screen text-white player ${mode}`
       : 'min-h-screen bg-black text-white'
+
+  const defaultGoals: UserGoals = {
+    dailyResets: goals?.dailyResets ?? 1,
+    preferredModes: goals?.preferredModes?.length ? goals.preferredModes : (Object.keys(MODE_META) as Mode[]),
+    preferredDuration: goals?.preferredDuration ?? 5,
+    reminderTime: goals?.reminderTime ?? null,
+  }
+  const editableGoals = draftGoals ?? defaultGoals
+  const settingsDisabled = isLockedToday
+  const hasAtLeastOneMode = editableGoals.preferredModes.length > 0
 
   return (
     <div className={shellClassName}>
@@ -364,7 +408,10 @@ export default function ResetRunApp() {
                 {paused ? 'Resume' : 'Pause'}
               </button>
               <button
-                onClick={() => setScreen('home')}
+                onClick={() => {
+                  setCompletionNotice(null)
+                  setScreen('home')
+                }}
                 className="w-full sm:w-1/2 py-4 font-semibold text-white border border-white/40 flex items-center justify-center gap-2"
               >
                 <X className="w-5 h-5" />
@@ -380,6 +427,9 @@ export default function ResetRunApp() {
               <p className="text-white/80 text-[clamp(1rem,3vw,1.5rem)] mb-10">
                 Quiet wins compound.
               </p>
+              {completionNotice ? (
+                <p className="text-sm text-white/70 mb-6">{completionNotice}</p>
+              ) : null}
               <div className="w-full max-w-md space-y-3">
                 <button
                   onClick={copyShareLink}
@@ -388,12 +438,15 @@ export default function ResetRunApp() {
                   <Share2 className="w-5 h-5" />
                   Copy Link
                 </button>
-                <button
-                  onClick={() => setScreen('home')}
-                  className="w-full py-4 font-semibold border border-white/40 text-white"
-                >
-                  Done
-                </button>
+              <button
+                onClick={() => {
+                  setCompletionNotice(null)
+                  setScreen('home')
+                }}
+                className="w-full py-4 font-semibold border border-white/40 text-white"
+              >
+                Done
+              </button>
               </div>
             </div>
           </div>
@@ -415,24 +468,34 @@ export default function ResetRunApp() {
               </div>
 
               <div className="space-y-6">
+                {settingsDisabled ? (
+                  <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">
+                    Locked until tomorrow.
+                  </div>
+                ) : null}
+
                 {/* Mode Selection */}
                 <div>
                   <h3 className="font-semibold mb-3">Select Modes to Display</h3>
                   <div className="space-y-2">
                     {(Object.keys(MODE_META) as Mode[]).map((m) => {
                       const MIcon = MODE_META[m].icon
-                      const isSelected = goals?.preferredModes?.includes(m) ?? true
+                      const isSelected = editableGoals.preferredModes.includes(m)
                       return (
                         <label
                           key={m}
-                          className="flex items-center gap-3 p-3 rounded-xl border border-white/10 hover:bg-white/5 cursor-pointer transition-colors"
+                          className={`flex items-center gap-3 p-3 rounded-xl border border-white/10 transition-colors ${
+                            settingsDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/5 cursor-pointer'
+                          }`}
                         >
                           <input
                             type="checkbox"
                             checked={isSelected}
+                            disabled={settingsDisabled}
                             onChange={(e) => {
-                              const currentModes = goals?.preferredModes?.length
-                                ? goals.preferredModes
+                              if (settingsDisabled) return
+                              const currentModes = editableGoals.preferredModes.length
+                                ? editableGoals.preferredModes
                                 : (Object.keys(MODE_META) as Mode[])
 
                               let newModes: Mode[]
@@ -442,17 +505,15 @@ export default function ResetRunApp() {
                                 newModes = currentModes.filter((mode) => mode !== m)
                               }
 
-                              // Ensure at least one mode is selected
                               if (newModes.length === 0) return
 
                               const updatedGoals: UserGoals = {
-                                dailyResets: goals?.dailyResets ?? 1,
+                                dailyResets: editableGoals.dailyResets,
                                 preferredModes: newModes,
-                                preferredDuration: goals?.preferredDuration ?? 5,
-                                reminderTime: goals?.reminderTime ?? null,
+                                preferredDuration: editableGoals.preferredDuration,
+                                reminderTime: editableGoals.reminderTime,
                               }
-                              saveGoals(updatedGoals)
-                              setGoals(updatedGoals)
+                              setDraftGoals(updatedGoals)
                             }}
                             className="w-5 h-5 rounded accent-white"
                           />
@@ -477,28 +538,21 @@ export default function ResetRunApp() {
                     {[1, 2, 3].map((num) => (
                       <button
                         key={num}
+                        disabled={settingsDisabled}
                         onClick={() => {
+                          if (settingsDisabled) return
                           const updatedGoals: UserGoals = {
+                            ...editableGoals,
                             dailyResets: num,
-                            preferredModes: goals?.preferredModes?.length
-                              ? goals.preferredModes
-                              : (Object.keys(MODE_META) as Mode[]),
-                            preferredDuration: goals?.preferredDuration ?? 5,
-                            reminderTime: goals?.reminderTime ?? null,
                           }
-                          saveGoals(updatedGoals)
-                          setGoals(updatedGoals)
-
-                          // Update store with new daily goal
-                          if (store) {
-                            const updated = updateDailyGoal(store, num)
-                            if (updated !== store) setStore(updated)
-                          }
+                          setDraftGoals(updatedGoals)
                         }}
                         className={`flex-1 py-3 rounded-xl font-semibold transition-colors ${
-                          (goals?.dailyResets ?? 1) === num
-                            ? 'bg-white text-black'
-                            : 'border border-white/15 bg-white/5 hover:bg-white/10'
+                          settingsDisabled
+                            ? 'border border-white/10 bg-white/5 text-white/40 cursor-not-allowed'
+                            : (editableGoals.dailyResets ?? 1) === num
+                              ? 'bg-white text-black'
+                              : 'border border-white/15 bg-white/5 hover:bg-white/10'
                         }`}
                       >
                         {num} reset{num > 1 ? 's' : ''}
@@ -514,23 +568,21 @@ export default function ResetRunApp() {
                     {DURATIONS.map((d) => (
                       <button
                         key={d}
+                        disabled={settingsDisabled}
                         onClick={() => {
+                          if (settingsDisabled) return
                           const updatedGoals: UserGoals = {
-                            dailyResets: goals?.dailyResets ?? 1,
-                            preferredModes: goals?.preferredModes?.length
-                              ? goals.preferredModes
-                              : (Object.keys(MODE_META) as Mode[]),
+                            ...editableGoals,
                             preferredDuration: d,
-                            reminderTime: goals?.reminderTime ?? null,
                           }
-                          saveGoals(updatedGoals)
-                          setGoals(updatedGoals)
-                          setDuration(d)
+                          setDraftGoals(updatedGoals)
                         }}
                         className={`flex-1 py-3 rounded-xl font-semibold transition-colors ${
-                          (goals?.preferredDuration ?? 5) === d
-                            ? 'bg-white text-black'
-                            : 'border border-white/15 bg-white/5 hover:bg-white/10'
+                          settingsDisabled
+                            ? 'border border-white/10 bg-white/5 text-white/40 cursor-not-allowed'
+                            : (editableGoals.preferredDuration ?? 5) === d
+                              ? 'bg-white text-black'
+                              : 'border border-white/15 bg-white/5 hover:bg-white/10'
                         }`}
                       >
                         {d} min
@@ -541,11 +593,103 @@ export default function ResetRunApp() {
               </div>
 
               <button
-                onClick={closeSettings}
-                className="w-full mt-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                onClick={() => {
+                  if (!store || !hasAtLeastOneMode) return
+                  const updatedGoals: UserGoals = {
+                    ...editableGoals,
+                    preferredModes: editableGoals.preferredModes.length
+                      ? editableGoals.preferredModes
+                      : (Object.keys(MODE_META) as Mode[]),
+                  }
+                  saveGoals(updatedGoals)
+                  setGoals(updatedGoals)
+                  setDraftGoals(updatedGoals)
+                  setDuration(updatedGoals.preferredDuration)
+                  if (!updatedGoals.preferredModes.includes(mode)) {
+                    setMode(updatedGoals.preferredModes[0])
+                  }
+                  let updatedStore = updateDailyGoal(store, updatedGoals.dailyResets)
+                  updatedStore = lockSettingsForToday(updatedStore)
+                  setStore(updatedStore)
+                }}
+                disabled={settingsDisabled || !hasAtLeastOneMode}
+                className={`w-full mt-6 py-3 font-bold rounded-xl transition-colors ${
+                  settingsDisabled || !hasAtLeastOneMode
+                    ? 'bg-white/10 text-white/40 cursor-not-allowed'
+                    : 'bg-white text-black hover:bg-gray-200'
+                }`}
               >
-                Done
+                Lock in for Today
               </button>
+
+              <div className="mt-6 border-t border-white/10 pt-6 space-y-3">
+                <h3 className="text-sm font-semibold text-white/70">Danger zone</h3>
+                {resetStep === 'idle' ? (
+                  <button
+                    onClick={() => {
+                      setResetStep('confirm')
+                      setResetText('')
+                    }}
+                    className="w-full py-3 border border-red-500/40 text-red-200 font-semibold rounded-xl hover:bg-red-500/10 transition-colors"
+                  >
+                    Start over
+                  </button>
+                ) : null}
+
+                {resetStep === 'confirm' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-white/70">
+                      This resets your entire 7-day run and clears progress.
+                    </p>
+                    <button
+                      onClick={() => setResetStep('typing')}
+                      className="w-full py-3 border border-white/20 text-white font-semibold rounded-xl hover:bg-white/10 transition-colors"
+                    >
+                      Continue
+                    </button>
+                    <button
+                      onClick={() => setResetStep('idle')}
+                      className="w-full py-3 text-white/60 hover:text-white transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : null}
+
+                {resetStep === 'typing' ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-white/70">
+                      Type RESET to confirm. This cannot be undone.
+                    </p>
+                    <input
+                      value={resetText}
+                      onChange={(e) => setResetText(e.target.value)}
+                      className="w-full rounded-xl border border-white/15 bg-black/50 px-3 py-2 text-sm text-white placeholder:text-white/30"
+                      placeholder="RESET"
+                    />
+                    <button
+                      onClick={() => {
+                        if (!store || resetText !== 'RESET') return
+                        const updated = resetRun(store)
+                        setStore(updated)
+                        setScreen('home')
+                        setCompletionNotice(null)
+                        setResetStep('idle')
+                        setResetText('')
+                        closeSettings()
+                      }}
+                      disabled={resetText !== 'RESET'}
+                      className={`w-full py-3 font-semibold rounded-xl transition-colors ${
+                        resetText === 'RESET'
+                          ? 'bg-red-500 text-white hover:bg-red-600'
+                          : 'bg-red-500/30 text-white/40 cursor-not-allowed'
+                      }`}
+                    >
+                      Start over
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
         )}
