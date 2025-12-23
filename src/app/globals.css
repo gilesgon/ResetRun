@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0A0A0A;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0A0A0;
+  --dark: #0A0A0A;
+  --calm-from: #1a2148;
+  --calm-to: #2a2f64;
+  --focus-from: #3a2912;
+  --focus-to: #5a3a12;
+  --clean-from: #0f2f2a;
+  --clean-to: #0f3a34;
+  --body-from: #3a1822;
+  --body-to: #4a1f2d;
+  --gradient-calm: linear-gradient(90deg, #1a2148, #2a2f64);
+  --gradient-focus: linear-gradient(90deg, #3a2912, #5a3a12);
+  --gradient-clean: linear-gradient(90deg, #0f2f2a, #0f3a34);
+  --gradient-body: linear-gradient(90deg, #3a1822, #4a1f2d);
+  --brand-gradient: linear-gradient(90deg, #6366F1, #8B5CF6);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Mode gradients */
+.mode-calm {
+  background: linear-gradient(135deg, var(--calm-from), var(--calm-to));
+}
+
+.mode-focus {
+  background: linear-gradient(135deg, var(--focus-from), var(--focus-to));
+}
+
+.mode-clean {
+  background: linear-gradient(135deg, var(--clean-from), var(--clean-to));
+}
+
+.mode-body {
+  background: linear-gradient(135deg, var(--body-from), var(--body-to));
+}
+
+.player.calm {
+  background: var(--gradient-calm);
+}
+
+.player.focus {
+  background: var(--gradient-focus);
+}
+
+.player.clean {
+  background: var(--gradient-clean);
+}
+
+.player.body {
+  background: var(--gradient-body);
+}
+
+/* Tap feedback for mobile */
+.tap-target {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Safe area padding for mobile */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
