@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { onAuthStateChanged, type User } from 'firebase/auth'
 import { User as UserIcon } from 'lucide-react'
-import { auth } from '@/lib/firebase'
+import { getFirebaseAuth } from '@/lib/firebase'
 
 function getInitials(email: string) {
   const base = email.split('@')[0] || email
@@ -14,14 +14,17 @@ function getInitials(email: string) {
 
 export default function ProfileChip() {
   const [user, setUser] = useState<User | null>(null)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
-    if (!auth) return
-    const unsub = onAuthStateChanged(auth, (u) => setUser(u))
+    setIsClient(true)
+    const firebaseAuth = getFirebaseAuth()
+    if (!firebaseAuth) return
+    const unsub = onAuthStateChanged(firebaseAuth, (u) => setUser(u))
     return () => unsub()
   }, [])
 
-  if (!auth) return null
+  if (!isClient) return null
 
   return (
     <Link

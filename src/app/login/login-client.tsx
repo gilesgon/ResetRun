@@ -18,7 +18,7 @@ import {
   type User,
 } from 'firebase/auth'
 import { Eye, EyeOff } from 'lucide-react'
-import { auth, firebaseConfigError } from '@/lib/firebase'
+import { getFirebaseAuth, firebaseConfigError } from '@/lib/firebase'
 
 export default function LoginClient() {
   const router = useRouter()
@@ -38,8 +38,9 @@ export default function LoginClient() {
   const [emailMode, setEmailMode] = useState<'signup' | 'signin'>('signup')
 
   useEffect(() => {
-    if (!auth) return
-    const unsub = onAuthStateChanged(auth, (u: User | null) => {
+    const firebaseAuth = getFirebaseAuth()
+    if (!firebaseAuth) return
+    const unsub = onAuthStateChanged(firebaseAuth, (u: User | null) => {
       if (u) {
         router.replace(next)
         return
@@ -51,15 +52,17 @@ export default function LoginClient() {
 
   async function loginWithGoogle() {
     setError(null)
-    if (!auth) return
+    const firebaseAuth = getFirebaseAuth()
+    if (!firebaseAuth) return
     const provider = new GoogleAuthProvider()
-    await signInWithPopup(auth, provider)
+    await signInWithPopup(firebaseAuth, provider)
     router.replace(next)
   }
 
   async function submitEmailAuth() {
     setError(null)
-    if (!auth) return
+    const firebaseAuth = getFirebaseAuth()
+    if (!firebaseAuth) return
 
     const trimmedEmail = email.trim()
     if (!trimmedEmail) {
@@ -78,7 +81,7 @@ export default function LoginClient() {
       }
 
       try {
-        await createUserWithEmailAndPassword(auth, trimmedEmail, password)
+        await createUserWithEmailAndPassword(firebaseAuth, trimmedEmail, password)
         router.replace(next)
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to create account.'
@@ -93,7 +96,7 @@ export default function LoginClient() {
     }
 
     try {
-      await signInWithEmailAndPassword(auth, trimmedEmail, password)
+      await signInWithEmailAndPassword(firebaseAuth, trimmedEmail, password)
       router.replace(next)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to sign in.'
@@ -101,7 +104,7 @@ export default function LoginClient() {
     }
   }
 
-  if (firebaseConfigError || !auth) {
+  if (firebaseConfigError || !getFirebaseAuth()) {
     return (
       <main className="min-h-screen bg-black text-white px-6 py-10">
         <div className="mx-auto max-w-md">
