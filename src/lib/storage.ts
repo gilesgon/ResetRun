@@ -190,8 +190,14 @@ export function saveGoals(goals: UserGoals) {
   window.localStorage.setItem(GOALS_KEY, JSON.stringify(goals))
 }
 
-export function loadGoals(): UserGoals | null {
+/**
+ * Load user goals (only use for authenticated users)
+ * For guests, always return null to ensure all 4 modes are shown
+ */
+export function loadGoals(isAuthenticated: boolean = false): UserGoals | null {
   if (typeof window === 'undefined') return null
+  if (!isAuthenticated) return null // Guests always see all modes
+
   const raw = window.localStorage.getItem(GOALS_KEY)
   if (!raw) return null
 
@@ -213,4 +219,12 @@ export function loadGoals(): UserGoals | null {
   } catch {
     return null
   }
+}
+
+/**
+ * Clear goals (useful when logging out)
+ */
+export function clearGoals() {
+  if (typeof window === 'undefined') return
+  window.localStorage.removeItem(GOALS_KEY)
 }
