@@ -33,7 +33,7 @@ export default function ProfileChip() {
         {user?.email ? getInitials(user.email) : <UserIcon className="h-3.5 w-3.5" />}
       </span>
       <span className="truncate max-w-[140px]">
-        {user?.email ? user.email : 'Guest'}
+        {user?.email ? user.email : 'Sign in'}
       </span>
     </Link>
   )
