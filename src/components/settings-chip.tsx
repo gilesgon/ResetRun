@@ -5,12 +5,14 @@ import { usePathname } from 'next/navigation'
 import { Settings } from 'lucide-react'
 import { onAuthStateChanged } from 'firebase/auth'
 import { getFirebaseAuth } from '@/lib/firebase'
+import { useSettings } from '@/components/settings-context'
 
 type SettingsChipProps = {
   onOpenSettings?: () => void
 }
 
 export default function SettingsChip({ onOpenSettings }: SettingsChipProps) {
+  const { openSettings } = useSettings()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isClient, setIsClient] = useState(false)
   const pathname = usePathname()
@@ -32,7 +34,7 @@ export default function SettingsChip({ onOpenSettings }: SettingsChipProps) {
 
   return (
     <button
-      onClick={onOpenSettings}
+      onClick={onOpenSettings || openSettings}
       className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/80 hover:text-white hover:border-white/30 transition-colors"
       aria-label="Settings"
     >
