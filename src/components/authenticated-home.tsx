@@ -32,7 +32,7 @@ export default function AuthenticatedHome() {
   }
 
   const totalResets = store.totalResets || 0
-  const currentStreak = store.completedDates.length
+  const currentStreak = store.completedDateKeys.length
 
   return (
     <div className="min-h-screen bg-black text-white">
