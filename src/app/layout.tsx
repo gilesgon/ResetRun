@@ -4,6 +4,7 @@ import HomeChip from '@/components/home-chip';
 import ResetRunChip from '@/components/reset-run-chip';
 import SettingsChip from '@/components/settings-chip';
 import ProfileChip from '@/components/profile-chip';
+import AppProviders from '@/components/app-providers';
 
 export const metadata: Metadata = {
   title: 'RESET RUN — Get back in control',
@@ -36,15 +37,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased min-h-screen">
-        <div className="fixed right-4 top-4 z-50 flex items-center gap-2">
-          <HomeChip />
-          <ResetRunChip />
-          <SettingsChip />
-          <ProfileChip />
-        </div>
-        {children}
+        <AppProviders>
+          <div className="fixed right-4 top-4 z-50 flex items-center gap-2">
+            <HomeChip />
+            <ResetRunChip />
+            <SettingsChip />
+            <ProfileChip />
+          </div>
+          {children}
+        </AppProviders>
       </body>
     </html>
   );
 }
-

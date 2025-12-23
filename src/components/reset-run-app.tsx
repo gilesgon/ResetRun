@@ -6,6 +6,7 @@ import confetti from 'canvas-confetti'
 import { onAuthStateChanged } from 'firebase/auth'
 import { getFirebaseAuth } from '@/lib/firebase'
 import { getProtocol, type Mode, type Duration, modeNames, modeColors } from '@/lib/protocols'
+import { useSettings } from '@/components/settings-context'
 import {
   getDayIndex,
   loadGoals,
@@ -50,10 +51,10 @@ function localDateKey(d: Date) {
 }
 
 export default function ResetRunApp() {
+  const { showSettings, openSettings, closeSettings } = useSettings()
   const [screen, setScreen] = useState<Screen>('home')
   const [store, setStore] = useState<Store | null>(null)
   const [showFallback, setShowFallback] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
 
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [goals, setGoals] = useState<UserGoals | null>(null)
@@ -127,7 +128,7 @@ export default function ResetRunApp() {
 
     // Check for #settings hash to auto-open settings modal
     if (window.location.hash === '#settings' && isAuthenticated) {
-      setShowSettings(true)
+      openSettings()
       // Clear the hash after opening
       window.history.replaceState(null, '', window.location.pathname + window.location.search)
     }
@@ -405,7 +406,7 @@ export default function ResetRunApp() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold">Settings</h2>
                 <button
-                  onClick={() => setShowSettings(false)}
+                  onClick={closeSettings}
                   className="p-2 rounded-lg hover:bg-white/10 transition-colors"
                   aria-label="Close settings"
                 >
@@ -540,7 +541,7 @@ export default function ResetRunApp() {
               </div>
 
               <button
-                onClick={() => setShowSettings(false)}
+                onClick={closeSettings}
                 className="w-full mt-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-colors"
               >
                 Done
