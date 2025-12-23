@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth'
-import { User as UserIcon, Settings, KeyRound, LogOut, ChevronDown } from 'lucide-react'
+import { User as UserIcon, KeyRound, LogOut, ChevronDown } from 'lucide-react'
 import { getFirebaseAuth } from '@/lib/firebase'
 
 function getInitials(email: string) {
@@ -90,15 +90,6 @@ export default function ProfileChip() {
             >
               <UserIcon className="w-4 h-4" />
               <span>Profile</span>
-            </Link>
-
-            <Link
-              href="/app"
-              onClick={() => setShowDropdown(false)}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/80 hover:bg-white/5 transition-colors"
-            >
-              <Settings className="w-4 h-4" />
-              <span>App Settings</span>
             </Link>
 
             <button
