@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Wind, Target, Sparkles, Dumbbell } from 'lucide-react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db, firebaseConfigError } from '@/lib/firebase';
+import { getFirebaseDb, firebaseConfigError } from '@/lib/firebase';
 
 const modes = [
   {
@@ -54,7 +54,8 @@ export default function LandingPage() {
       setFormStatus('error');
       return;
     }
-    if (!db || firebaseConfigError) {
+    const firebaseDb = getFirebaseDb();
+    if (!firebaseDb || firebaseConfigError) {
       setErrorMessage('Waitlist is not configured yet.');
       setFormStatus('error');
       return;
@@ -88,7 +89,7 @@ export default function LandingPage() {
       if (trimmedLast) payload.lastName = trimmedLast;
       if (trimmedPhone) payload.phone = trimmedPhone;
 
-      await addDoc(collection(db, 'waitlist'), payload);
+      await addDoc(collection(firebaseDb, 'waitlist'), payload);
       setFormStatus('success');
       setErrorMessage(null);
       setEmail('');

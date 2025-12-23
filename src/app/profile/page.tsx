@@ -3,15 +3,16 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth'
-import { auth, firebaseConfigError } from '@/lib/firebase'
+import { getFirebaseAuth, firebaseConfigError } from '@/lib/firebase'
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null)
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    if (!auth) return
-    const unsub = onAuthStateChanged(auth, (u) => {
+    const firebaseAuth = getFirebaseAuth()
+    if (!firebaseAuth) return
+    const unsub = onAuthStateChanged(firebaseAuth, (u) => {
       setUser(u)
       setReady(true)
     })
@@ -19,11 +20,12 @@ export default function ProfilePage() {
   }, [])
 
   async function handleSignOut() {
-    if (!auth) return
-    await signOut(auth)
+    const firebaseAuth = getFirebaseAuth()
+    if (!firebaseAuth) return
+    await signOut(firebaseAuth)
   }
 
-  if (firebaseConfigError || !auth) {
+  if (firebaseConfigError || !getFirebaseAuth()) {
     return (
       <main className="min-h-screen bg-black text-white px-6 py-10">
         <div className="mx-auto max-w-md">

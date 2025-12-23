@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Wind, Target, Sparkles, Dumbbell, Check } from 'lucide-react';
 import Link from 'next/link';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth, firebaseConfigError } from '@/lib/firebase';
+import { getFirebaseAuth, firebaseConfigError } from '@/lib/firebase';
 import { Mode, Duration, modeNames } from '@/lib/protocols';
 import { saveGoals, UserGoals } from '@/lib/storage';
 
@@ -37,8 +37,9 @@ export default function SignupPage() {
 
   // Require login before onboarding
   useEffect(() => {
-    if (!auth) return;
-    const unsub = onAuthStateChanged(auth, (u: User | null) => {
+    const firebaseAuth = getFirebaseAuth();
+    if (!firebaseAuth) return;
+    const unsub = onAuthStateChanged(firebaseAuth, (u: User | null) => {
       if (!u) {
         router.replace('/login?next=/signup');
         return;
@@ -48,7 +49,7 @@ export default function SignupPage() {
     return () => unsub();
   }, [router]);
 
-  if (firebaseConfigError || !auth) {
+  if (firebaseConfigError || !getFirebaseAuth()) {
     return (
       <div className="min-h-screen bg-black text-white px-6 flex items-center justify-center">
         <div className="max-w-md w-full">
