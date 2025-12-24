@@ -38,7 +38,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased min-h-screen">
         <AppProviders>
-          <div className="fixed right-4 top-4 z-50 flex items-center gap-2">
+          <div className="fixed right-4 top-4 z-50 flex items-center gap-2 hidden md:flex">
             <HomeChip />
             <ResetRunChip />
             <SettingsChip />

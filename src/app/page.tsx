@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Wind, Target, Sparkles, Dumbbell } from 'lucide-react';
+import { Wind, Target, Sparkles, Dumbbell, Check } from 'lucide-react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getFirebaseDb, getFirebaseAuth, firebaseConfigError } from '@/lib/firebase';
 import AuthenticatedHome from '@/components/authenticated-home';
+import { layout, type as typo, surface, ui, modeColors, motionVariants } from '@/lib/brand';
 
 const modes = [
   {
@@ -137,194 +138,428 @@ export default function LandingPage() {
 
   // Show landing page for guests
   return (
-    <div className="min-h-screen">
+    <div className={surface.pageBg}>
+      {/* Sticky Header */}
+      <header className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur border-b border-white/10">
+        <div className={`${layout.container} flex items-center justify-between py-4`}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="text-lg font-bold"
+          >
+            <Link href="#top" className="hover:text-white/80 transition-colors">
+              RESET RUN
+            </Link>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="flex items-center gap-4"
+          >
+            <Link href="#pro" className={`text-sm ${ui.mutedLink}`}>
+              Pro
+            </Link>
+            <Link href="/app" className={`text-sm font-bold px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 transition-all`}>
+              Try Reset Run
+            </Link>
+          </motion.div>
+        </div>
+      </header>
+
       {/* Hero */}
-      <div className="container mx-auto px-6 py-16 md:py-24 text-center">
+      <div id="top" className={`${layout.container} ${layout.section} pt-32 md:pt-40 text-center`}>
         <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-5xl md:text-7xl font-bold mb-6"
+          initial={motionVariants.fadeInUp.initial}
+          animate={motionVariants.fadeInUp.animate}
+          transition={motionVariants.fadeInUp.transition}
+          className={typo.h1}
         >
           RESET RUN
         </motion.h1>
         
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-lg md:text-2xl text-gray-300 max-w-2xl mx-auto mb-10"
+          initial={motionVariants.fadeInUp.initial}
+          animate={motionVariants.fadeInUp.animate}
+          transition={{ ...motionVariants.fadeInUp.transition, delay: 0.1 }}
+          className={`${typo.body} max-w-2xl mx-auto mb-4 text-white/70`}
         >
           A 2–10 minute escape hatch to reset your nervous system, focus, space, or body.
         </motion.p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="flex flex-col sm:flex-row justify-center gap-4 mb-16"
+        <motion.p
+          initial={motionVariants.fadeInUp.initial}
+          animate={motionVariants.fadeInUp.animate}
+          transition={{ ...motionVariants.fadeInUp.transition, delay: 0.15 }}
+          className={`${typo.bodySm} max-w-2xl mx-auto mb-10 text-white/60`}
         >
-          <Link
-            href="/app"
-            className="tap-target px-8 py-4 bg-white text-black font-bold rounded-full text-lg hover:bg-gray-200 active:scale-95 transition-all text-center"
-          >
+          Short resets beat long intentions.
+        </motion.p>
+
+        <motion.div
+          initial={motionVariants.fadeInUp.initial}
+          animate={motionVariants.fadeInUp.animate}
+          transition={{ ...motionVariants.fadeInUp.transition, delay: 0.2 }}
+          className="flex flex-col sm:flex-row justify-center gap-4 mb-6"
+        >
+          <Link href="/app" className={ui.primaryButton}>
             Try Free Demo
           </Link>
-          <Link
-            href="/login?next=/signup"
-            className="tap-target px-8 py-4 bg-transparent border-2 border-white text-white font-bold rounded-full text-lg hover:bg-white/10 active:scale-95 transition-all"
-          >
+          <Link href="/login?next=/signup" className={ui.secondaryButton}>
             Create Account
           </Link>
         </motion.div>
+
+        <motion.p
+          initial={motionVariants.fadeInUp.initial}
+          animate={motionVariants.fadeInUp.animate}
+          transition={{ ...motionVariants.fadeInUp.transition, delay: 0.25 }}
+          className={typo.mutedSm}
+        >
+          No sign-up required to try.
+        </motion.p>
       </div>
 
-      {/* Features */}
-      <div className="container mx-auto px-6 py-12">
-        <motion.h2
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="text-2xl md:text-3xl font-bold text-center mb-12"
+      {/* The Moment */}
+      <section id="moment" className={`${layout.container} ${layout.section}`}>
+        <motion.div
+          initial={motionVariants.fadeIn.initial}
+          whileInView={motionVariants.fadeIn.whileInView}
+          viewport={motionVariants.fadeIn.viewport}
+          className="max-w-2xl mx-auto"
         >
-          4 Modes. Zero Friction.
-        </motion.h2>
-        
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
-          {modes.map((mode, i) => (
-            <motion.div
-              key={mode.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className={`bg-gradient-to-br ${mode.gradient} p-5 rounded-xl border border-gray-800`}
+          <h2 className={`${typo.h2} mb-8 text-center`}>The Moment</h2>
+          
+          <ul className={`${layout.sectionSpacing} mb-8`}>
+            <li className={`${typo.body} text-white/70`}>47 tabs, 12 notifications, endless scroll.</li>
+            <li className={`${typo.body} text-white/70`}>You know what to do, but can't begin.</li>
+            <li className={`${typo.body} text-white/70`}>Shoulders up, breath shallow, stuck.</li>
+          </ul>
+
+          <div className="text-center">
+            <Link
+              href="/app?mode=calm&duration=2"
+              className={`${ui.secondaryButton} inline-block`}
             >
-              <mode.icon className="w-6 h-6 mb-3 stroke-[1.5]" />
-              <h3 className="font-bold text-lg mb-1">{mode.name}</h3>
-              <p className="text-gray-400 text-sm leading-snug">{mode.description}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+              Start a 2-minute reset
+            </Link>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* The Insight */}
+      <section id="insight" className={`${layout.container} ${layout.section}`}>
+        <motion.div
+          initial={motionVariants.fadeIn.initial}
+          whileInView={motionVariants.fadeIn.whileInView}
+          viewport={motionVariants.fadeIn.viewport}
+          className="max-w-3xl mx-auto"
+        >
+          <h2 className={`${typo.h2} mb-12 text-center`}>The Insight</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+            {['Too long.', 'Too complicated.', 'Too performative.'].map((text, i) => (
+              <div
+                key={i}
+                className={`${surface.card} text-center`}
+              >
+                <p className={`${typo.bodySm} text-white/70`}>{text}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <p className={`${typo.h3} text-white/90`}>
+              2 minutes that you actually do &gt; 30 minutes you never start
+            </p>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Modes Picker */}
+      <section id="modes" className={`${layout.container} ${layout.section}`}>
+        <motion.div
+          initial={motionVariants.fadeIn.initial}
+          whileInView={motionVariants.fadeIn.whileInView}
+          viewport={motionVariants.fadeIn.viewport}
+        >
+          <h2 className={`${typo.h2} mb-2 text-center`}>Pick a Reset</h2>
+          <p className={`${typo.bodySm} text-center mb-12 text-white/60`}>
+            4 modes × 3 durations → guided steps with timers
+          </p>
+
+          <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
+            {modes.map((mode) => {
+              const Icon = mode.icon;
+              const colorConfig = modeColors[mode.id as keyof typeof modeColors];
+              return (
+                <div
+                  key={mode.id}
+                  className={`${surface.modeCard} bg-gradient-to-br ${colorConfig.gradient}`}
+                >
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className={`${ui.modeIconContainer} ${colorConfig.iconBg}`}>
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <div className={`${typo.h3} text-white`}>{mode.name}</div>
+                      <p className={`${typo.mutedSm} text-white/60`}>{mode.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    {[2, 5, 10].map((duration) => (
+                      <Link
+                        key={duration}
+                        href={`/app?mode=${mode.id}&duration=${duration}`}
+                        className={`${ui.durationChip} ${ui.durationChipInactive}`}
+                      >
+                        {duration} min
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+      </section>
 
       {/* How It Works */}
-      <div className="container mx-auto px-6 py-16">
+      <section id="how" className={`${layout.container} ${layout.section}`}>
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          initial={motionVariants.fadeIn.initial}
+          whileInView={motionVariants.fadeIn.whileInView}
+          viewport={motionVariants.fadeIn.viewport}
+          className="max-w-2xl mx-auto"
+        >
+          <h2 className={`${typo.h2} mb-12 text-center`}>Three steps. Zero friction.</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { num: 1, text: 'Pick mode + time' },
+              { num: 2, text: 'Follow the steps (full-viewport timer)' },
+              { num: 3, text: 'Complete + streak (Day 7 confetti)' },
+            ].map((step) => (
+              <div key={step.num} className="text-left">
+                <div className={`${typo.h2} text-white/30 mb-2`}>{step.num}</div>
+                <p className={typo.body}>{step.text}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/app" className={`${ui.primaryButton} inline-block`}>
+              Try it now
+            </Link>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Streak Integrity */}
+      <section id="streak" className={`${layout.container} ${layout.section}`}>
+        <motion.div
+          initial={motionVariants.fadeIn.initial}
+          whileInView={motionVariants.fadeIn.whileInView}
+          viewport={motionVariants.fadeIn.viewport}
+          className="max-w-2xl mx-auto"
+        >
+          <h2 className={`${typo.h2} mb-4 text-center`}>Streak Integrity</h2>
+          <p className={`${typo.bodySm} text-center mb-8 text-white/60`}>
+            We reward showing up, not gaming.
+          </p>
+
+          <div className={surface.card}>
+            <ul className={layout.sectionSpacing}>
+              <li className="flex gap-3 items-start">
+                <Check className="w-5 h-5 text-white/50 mt-1 flex-shrink-0" />
+                <p className={typo.bodySm}>Only 1 completion counts per calendar day</p>
+              </li>
+              <li className="flex gap-3 items-start">
+                <Check className="w-5 h-5 text-white/50 mt-1 flex-shrink-0" />
+                <p className={typo.bodySm}>No bingeing to fake a streak</p>
+              </li>
+              <li className="flex gap-3 items-start">
+                <Check className="w-5 h-5 text-white/50 mt-1 flex-shrink-0" />
+                <p className={typo.bodySm}>Confetti only on true Day 7 completion</p>
+              </li>
+            </ul>
+          </div>
+
+          {/* Streak visualization */}
+          <div className="mt-8 flex gap-2 justify-center">
+            {Array.from({ length: 7 }).map((_, i) => (
+              <div
+                key={i + 1}
+                className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs font-bold ${
+                  i < 3
+                    ? 'border-white bg-white text-black'
+                    : 'border-white/20 text-white/30'
+                }`}
+              >
+                {i < 3 ? <Check className="w-4 h-4" /> : '○'}
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Share a Reset */}
+      <section id="share" className={`${layout.container} ${layout.section}`}>
+        <motion.div
+          initial={motionVariants.fadeIn.initial}
+          whileInView={motionVariants.fadeIn.whileInView}
+          viewport={motionVariants.fadeIn.viewport}
           className="max-w-2xl mx-auto text-center"
         >
-          <h2 className="text-2xl md:text-3xl font-bold mb-8">How It Works</h2>
-          <div className="flex flex-col md:flex-row justify-center gap-8 text-left">
-            <div className="flex-1">
-              <div className="text-4xl font-bold text-gray-700 mb-2">1</div>
-              <p className="text-gray-300">Pick a mode and time (2, 5, or 10 min)</p>
-            </div>
-            <div className="flex-1">
-              <div className="text-4xl font-bold text-gray-700 mb-2">2</div>
-              <p className="text-gray-300">Follow the guided steps with timers</p>
-            </div>
-            <div className="flex-1">
-              <div className="text-4xl font-bold text-gray-700 mb-2">3</div>
-              <p className="text-gray-300">Complete 7 days. Share your progress.</p>
-            </div>
-          </div>
-        </motion.div>
-      </div>
+          <h2 className={`${typo.h2} mb-4`}>Share a Reset</h2>
+          <p className={`${typo.body} text-white/70 mb-8`}>
+            Deep links that drop friends directly into a session. No sign-up required to try.
+          </p>
 
-      {/* Pro Updates CTA */}
-      <div id="pro-updates" className="container mx-auto px-6 py-16 max-w-2xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-8"
-        >
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">Pro Accounts</h2>
-          <p className="text-gray-400">
-            Sync across devices and set goals.
-            Get notified when Pro features launch.
+          <div className="space-y-3 mb-8">
+            {[
+              'resetrun.app/r/calm-5',
+              'resetrun.app/r/focus-2',
+              'resetrun.app/r/clean-10',
+              'resetrun.app/r/body-5',
+            ].map((link) => (
+              <code
+                key={link}
+                className={`block ${surface.card} font-mono ${typo.bodySm} text-white/70 break-all`}
+              >
+                {link}
+              </code>
+            ))}
+          </div>
+
+          <p className={`${typo.mutedSm} text-white/50`}>
+            Share links available once feature is deployed
           </p>
         </motion.div>
+      </section>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setErrorMessage(null);
-                setFormStatus('idle');
-              }}
-              placeholder="your@email.com"
-              className="flex-grow px-5 py-3 bg-gray-900 border border-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-white/30 text-white"
-              required
-            />
-            <button
-              type="submit"
-              className="tap-target px-6 py-3 bg-white text-black font-bold rounded-full hover:bg-gray-200 active:scale-95 transition-all"
-            >
-              Get Pro Updates
-            </button>
-          </div>
+      {/* Pro Accounts */}
+      <section id="pro" className={`${layout.container} ${layout.section}`}>
+        <motion.div
+          initial={motionVariants.fadeIn.initial}
+          whileInView={motionVariants.fadeIn.whileInView}
+          viewport={motionVariants.fadeIn.viewport}
+          className="max-w-2xl mx-auto"
+        >
+          <h2 className={`${typo.h2} mb-2 text-center`}>Pro Accounts</h2>
+          <p className={`${typo.bodySm} text-center mb-8 text-white/60`}>
+            Sync + insights across devices (coming soon).
+          </p>
 
-          {email.includes('@') ? (
-            <button
-              type="button"
-              onClick={() => setShowDetails((prev) => !prev)}
-              className="text-xs text-white/60 hover:text-white text-left"
-            >
-              {showDetails ? 'Hide optional details' : 'Add optional details'}
-            </button>
-          ) : null}
+          <ul className={`${layout.sectionSpacing} mb-8`}>
+            <li className={`${typo.body} text-white/70`}>Cloud sync: your progress everywhere</li>
+            <li className={`${typo.body} text-white/70`}>Insights: patterns, streak trends, reset types</li>
+            <li className={`${typo.body} text-white/70`}>No ads. No noise.</li>
+          </ul>
 
-          {showDetails ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3 mb-6">
+            <div className="flex flex-col sm:flex-row gap-3">
               <input
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="First name (optional)"
-                className="px-5 py-3 bg-gray-900 border border-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-white/30 text-white"
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setErrorMessage(null);
+                  setFormStatus('idle');
+                }}
+                placeholder="your@email.com"
+                className="flex-grow px-5 py-3 bg-gray-900 border border-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-white/30 text-white"
+                required
               />
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Last name (optional)"
-                className="px-5 py-3 bg-gray-900 border border-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-white/30 text-white"
-              />
-              <input
-                type="tel"
-                inputMode="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="Phone (optional)"
-                className="sm:col-span-2 px-5 py-3 bg-gray-900 border border-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-white/30 text-white"
-              />
+              <button
+                type="submit"
+                className={ui.smallButton}
+              >
+                Join Waitlist
+              </button>
             </div>
-          ) : null}
-        </form>
 
-        <div className="mt-4 text-center text-sm min-h-6">
-          {formStatus === 'success' && (
-            <span className="text-green-400">Thanks! You're on the list.</span>
-          )}
-          {formStatus === 'error' && (
-            <span className="text-red-400">{errorMessage}</span>
-          )}
-        </div>
-      </div>
+            {email.includes('@') ? (
+              <button
+                type="button"
+                onClick={() => setShowDetails((prev) => !prev)}
+                className={`text-xs ${ui.mutedLink}`}
+              >
+                {showDetails ? 'Hide optional details' : 'Add optional details'}
+              </button>
+            ) : null}
+
+            {showDetails ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="First name (optional)"
+                  className="px-5 py-3 bg-gray-900 border border-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-white/30 text-white"
+                />
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Last name (optional)"
+                  className="px-5 py-3 bg-gray-900 border border-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-white/30 text-white"
+                />
+                <input
+                  type="tel"
+                  inputMode="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Phone (optional)"
+                  className="sm:col-span-2 px-5 py-3 bg-gray-900 border border-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-white/30 text-white"
+                />
+              </div>
+            ) : null}
+          </form>
+
+          <div className="text-center text-sm min-h-6">
+            {formStatus === 'success' && (
+              <span className="text-green-400">Thanks! You're on the list.</span>
+            )}
+            {formStatus === 'error' && (
+              <span className="text-red-400">{errorMessage}</span>
+            )}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Final Close */}
+      <section id="close" className={`${layout.container} ${layout.section} pb-20`}>
+        <motion.div
+          initial={motionVariants.fadeIn.initial}
+          whileInView={motionVariants.fadeIn.whileInView}
+          viewport={motionVariants.fadeIn.viewport}
+          className="max-w-2xl mx-auto text-center"
+        >
+          <h2 className={`${typo.h2} mb-8`}>Your 2–10 minute escape hatch.</h2>
+          
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Link href="/app" className={ui.primaryButton}>
+              Try Free Demo
+            </Link>
+            <Link href="/login?next=/signup" className={ui.secondaryButton}>
+              Create Account
+            </Link>
+            <Link href="#pro" className={`${ui.secondaryButton} hidden md:inline-block`}>
+              Join Pro Waitlist
+            </Link>
+          </div>
+        </motion.div>
+      </section>
 
       {/* Footer */}
-      <footer className="py-8 text-center text-gray-600 text-sm border-t border-gray-900 safe-bottom">
-        <div>Made with intention. <a href="mailto:support@resetrun.app" className="hover:text-gray-300">support@resetrun.app</a></div>
-        <div className="mt-2 flex items-center justify-center gap-4 text-gray-500">
-          <a href="/privacy" className="hover:text-gray-300">Privacy</a>
-          <a href="/terms" className="hover:text-gray-300">Terms</a>
+      <footer className={`${surface.divider} py-8 text-center ${typo.mutedSm}`}>
+        <div>Made with intention. <a href="mailto:support@resetrun.app" className={ui.mutedLink}>support@resetrun.app</a></div>
+        <div className="mt-2 flex items-center justify-center gap-4">
+          <Link href="/privacy" className={ui.mutedLink}>Privacy</Link>
+          <Link href="/terms" className={ui.mutedLink}>Terms</Link>
         </div>
       </footer>
     </div>

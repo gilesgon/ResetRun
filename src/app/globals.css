@@ -4,6 +4,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Smooth scrolling for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   --bg: #0A0A0A;
   --text-primary: #FFFFFF;
