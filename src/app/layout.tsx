@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import HomeChip from '@/components/home-chip';
-import ResetRunChip from '@/components/reset-run-chip';
-import SettingsChip from '@/components/settings-chip';
-import ProfileChip from '@/components/profile-chip';
+import NavChips from '@/components/nav-chips';
 import AppProviders from '@/components/app-providers';
 
 export const metadata: Metadata = {
@@ -38,12 +35,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased min-h-screen">
         <AppProviders>
-          <div className="fixed right-4 top-4 z-50 flex items-center gap-2 hidden md:flex">
-            <HomeChip />
-            <ResetRunChip />
-            <SettingsChip />
-            <ProfileChip />
-          </div>
+          <NavChips />
           {children}
         </AppProviders>
       </body>

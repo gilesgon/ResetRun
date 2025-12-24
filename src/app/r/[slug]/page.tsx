@@ -107,7 +107,7 @@ if (!slug) return
           className="flex flex-col gap-3 w-full max-w-xs"
         >
           <Link
-            href={`/app?mode=${mode}&duration=${duration}`}
+            href={`/session?mode=${mode}&duration=${duration}&returnTo=/`}
             className="tap-target w-full py-4 bg-white text-black font-bold rounded-full flex items-center justify-center gap-2"
           >
             <Play className="w-5 h-5" />

@@ -1,6 +1,12 @@
 import Link from 'next/link'
 import { Wind } from 'lucide-react'
 
+/**
+ * Reset Run nav chip
+ * Points to /app which shows:
+ * - Dashboard for authenticated users
+ * - Redirects to landing for unauthenticated users
+ */
 export default function ResetRunChip() {
   return (
     <Link

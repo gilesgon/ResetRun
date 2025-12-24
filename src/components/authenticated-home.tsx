@@ -121,7 +121,7 @@ export default function AuthenticatedHome() {
                   {DURATIONS.map((duration) => (
                     <Link
                       key={duration}
-                      href={`/app?mode=${mode}&duration=${duration}`}
+                      href={`/session?mode=${mode}&duration=${duration}&returnTo=/app`}
                       className="flex-1 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 py-3 text-sm font-semibold text-center transition-colors"
                     >
                       {duration} min
