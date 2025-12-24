@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Wind, Target, Sparkles, Dumbbell, Check } from 'lucide-react';
+import { Wind, Target, Sparkles, Dumbbell } from 'lucide-react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getFirebaseDb, getFirebaseAuth, firebaseConfigError } from '@/lib/firebase';
@@ -163,7 +163,7 @@ export default function LandingPage() {
             <Link href="#pro" className={`text-sm ${ui.mutedLink}`}>
               Pro
             </Link>
-            <Link href="/app" className={`text-sm font-bold px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 transition-all`}>
+            <Link href="#modes" className={`text-sm font-bold px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 transition-all`}>
               Try Reset Run
             </Link>
           </motion.div>
@@ -206,7 +206,7 @@ export default function LandingPage() {
           className="mb-6"
         >
           <PillGroup>
-            <PillButton variant="solid" href="/app">
+            <PillButton variant="solid" href="#modes">
               Try Free Demo
             </PillButton>
             <PillButton variant="subtle" href="/login?next=/signup">
@@ -361,54 +361,6 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      {/* Streak Integrity */}
-      <section id="streak" className={`${layout.container} ${layout.section}`}>
-        <motion.div
-          initial={motionVariants.fadeIn.initial}
-          whileInView={motionVariants.fadeIn.whileInView}
-          viewport={motionVariants.fadeIn.viewport}
-          className="max-w-2xl mx-auto"
-        >
-          <h2 className={`${typo.h2} mb-4 text-center`}>Streak Integrity</h2>
-          <p className={`${typo.bodySm} text-center mb-8 text-white/60`}>
-            We reward showing up, not gaming.
-          </p>
-
-          <div className={surface.card}>
-            <ul className={layout.sectionSpacing}>
-              <li className="flex gap-3 items-start">
-                <Check className="w-5 h-5 text-white/50 mt-1 flex-shrink-0" />
-                <p className={typo.bodySm}>Only 1 completion counts per calendar day</p>
-              </li>
-              <li className="flex gap-3 items-start">
-                <Check className="w-5 h-5 text-white/50 mt-1 flex-shrink-0" />
-                <p className={typo.bodySm}>No bingeing to fake a streak</p>
-              </li>
-              <li className="flex gap-3 items-start">
-                <Check className="w-5 h-5 text-white/50 mt-1 flex-shrink-0" />
-                <p className={typo.bodySm}>Confetti only on true Day 7 completion</p>
-              </li>
-            </ul>
-          </div>
-
-          {/* Streak visualization */}
-          <div className="mt-8 flex gap-2 justify-center">
-            {Array.from({ length: 7 }).map((_, i) => (
-              <div
-                key={i + 1}
-                className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs font-bold ${
-                  i < 3
-                    ? 'border-white bg-white text-black'
-                    : 'border-white/20 text-white/30'
-                }`}
-              >
-                {i < 3 ? <Check className="w-4 h-4" /> : '○'}
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      </section>
-
       {/* Share a Reset */}
       <section id="share" className={`${layout.container} ${layout.section}`}>
         <motion.div
@@ -454,14 +406,17 @@ export default function LandingPage() {
         >
           <h2 className={`${typo.h2} mb-2 text-center`}>Pro Accounts</h2>
           <p className={`${typo.bodySm} text-center mb-8 text-white/60`}>
-            Sync + insights across devices (coming soon).
+            A deeper Reset Run — when you want your system to remember.
           </p>
 
-          <ul className={`${layout.sectionSpacing} mb-8`}>
-            <li className={`${typo.body} text-white/70`}>Cloud sync: your progress everywhere</li>
-            <li className={`${typo.body} text-white/70`}>Insights: patterns, streak trends, reset types</li>
-            <li className={`${typo.body} text-white/70`}>No ads. No noise.</li>
+          <ul className={`${layout.sectionSpacing} mb-6`}>
+            <li className={`${typo.body} text-white/70`}>Cross-device continuity.</li>
+            <li className={`${typo.body} text-white/70`}>Lightweight insights that spot patterns.</li>
           </ul>
+
+          <p className={`${typo.mutedSm} text-center mb-8`}>
+            Invite-only at launch.
+          </p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-3 mb-6">
             <div className="flex flex-col sm:flex-row gap-3">

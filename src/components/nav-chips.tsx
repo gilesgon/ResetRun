@@ -7,13 +7,15 @@ import SettingsChip from '@/components/settings-chip'
 import ProfileChip from '@/components/profile-chip'
 
 /**
- * Nav chips - hidden on session page to avoid UI overlap
+ * Nav chips - hidden on landing and session pages
+ * Landing uses its own sticky header
+ * Session requires full immersion
  */
 export default function NavChips() {
   const pathname = usePathname()
 
-  // Hide nav on session page for full immersion
-  if (pathname === '/session') {
+  // Hide nav on landing (has its own sticky header) and session (full immersion)
+  if (pathname === '/' || pathname === '/session') {
     return null
   }
 
