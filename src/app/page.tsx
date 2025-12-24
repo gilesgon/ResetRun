@@ -245,7 +245,7 @@ export default function LandingPage() {
           </ul>
 
           <div className="text-center">
-            <PillButton variant="solid" href="/app?mode=calm&duration=2">
+            <PillButton variant="solid" href="/session?mode=calm&duration=2&returnTo=/">
               Start a 2-minute reset
             </PillButton>
           </div>
@@ -316,7 +316,7 @@ export default function LandingPage() {
                     {[2, 5, 10].map((duration) => (
                       <Link
                         key={duration}
-                        href={`/app?mode=${mode.id}&duration=${duration}`}
+                        href={`/session?mode=${mode.id}&duration=${duration}&returnTo=/`}
                         className={`${ui.durationChip} ${ui.durationChipInactive}`}
                       >
                         {duration} min
