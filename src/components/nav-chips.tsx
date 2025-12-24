@@ -2,7 +2,6 @@
 
 import { usePathname } from 'next/navigation'
 import HomeChip from '@/components/home-chip'
-import ResetRunChip from '@/components/reset-run-chip'
 import SettingsChip from '@/components/settings-chip'
 import ProfileChip from '@/components/profile-chip'
 
@@ -22,7 +21,6 @@ export default function NavChips() {
   return (
     <div className="fixed right-4 top-4 z-50 flex items-center gap-2 hidden md:flex">
       <HomeChip />
-      <ResetRunChip />
       <SettingsChip />
       <ProfileChip />
     </div>
