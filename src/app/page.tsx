@@ -158,13 +158,21 @@ export default function LandingPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4, delay: 0.1 }}
-            className="flex items-center gap-4"
+            className="flex items-center gap-2"
           >
-            <Link href="#pro" className={`text-sm ${ui.mutedLink}`}>
-              Pro
-            </Link>
-            <Link href="#modes" className={`text-sm font-bold px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 transition-all`}>
+            <button
+              onClick={() => {
+                document.getElementById('modes')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }}
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/80 hover:text-white hover:border-white/30 transition-colors"
+            >
               Try Reset Run
+            </button>
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/80 hover:text-white hover:border-white/30 transition-colors"
+            >
+              Sign in
             </Link>
           </motion.div>
         </div>
