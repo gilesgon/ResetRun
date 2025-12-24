@@ -9,6 +9,8 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { getFirebaseDb, getFirebaseAuth, firebaseConfigError } from '@/lib/firebase';
 import AuthenticatedHome from '@/components/authenticated-home';
 import { layout, type as typo, surface, ui, modeColors, motionVariants } from '@/lib/brand';
+import PillButton from '@/components/ui/PillButton';
+import PillGroup from '@/components/ui/PillGroup';
 
 const modes = [
   {
@@ -201,14 +203,19 @@ export default function LandingPage() {
           initial={motionVariants.fadeInUp.initial}
           animate={motionVariants.fadeInUp.animate}
           transition={{ ...motionVariants.fadeInUp.transition, delay: 0.2 }}
-          className="flex flex-col sm:flex-row justify-center gap-4 mb-6"
+          className="mb-6"
         >
-          <Link href="/app" className={ui.primaryButton}>
-            Try Free Demo
-          </Link>
-          <Link href="/login?next=/signup" className={ui.secondaryButton}>
-            Create Account
-          </Link>
+          <PillGroup>
+            <PillButton variant="solid" href="/app">
+              Try Free Demo
+            </PillButton>
+            <PillButton variant="subtle" href="/login?next=/signup">
+              Create Account
+            </PillButton>
+            <PillButton variant="subtle" href="/#pro">
+              Join Pro Waitlist
+            </PillButton>
+          </PillGroup>
         </motion.div>
 
         <motion.p
@@ -238,12 +245,9 @@ export default function LandingPage() {
           </ul>
 
           <div className="text-center">
-            <Link
-              href="/app?mode=calm&duration=2"
-              className={`${ui.secondaryButton} inline-block`}
-            >
+            <PillButton variant="solid" href="/app?mode=calm&duration=2">
               Start a 2-minute reset
-            </Link>
+            </PillButton>
           </div>
         </motion.div>
       </section>
@@ -350,9 +354,9 @@ export default function LandingPage() {
           </div>
 
           <div className="text-center mt-12">
-            <Link href="/app" className={`${ui.primaryButton} inline-block`}>
+            <PillButton variant="solid" href="/app">
               Try it now
-            </Link>
+            </PillButton>
           </div>
         </motion.div>
       </section>
@@ -539,18 +543,18 @@ export default function LandingPage() {
           className="max-w-2xl mx-auto text-center"
         >
           <h2 className={`${typo.h2} mb-8`}>Your 2–10 minute escape hatch.</h2>
-          
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link href="/app" className={ui.primaryButton}>
+
+          <PillGroup>
+            <PillButton variant="solid" href="/app">
               Try Free Demo
-            </Link>
-            <Link href="/login?next=/signup" className={ui.secondaryButton}>
+            </PillButton>
+            <PillButton variant="subtle" href="/login?next=/signup">
               Create Account
-            </Link>
-            <Link href="#pro" className={`${ui.secondaryButton} hidden md:inline-block`}>
+            </PillButton>
+            <PillButton variant="subtle" href="/#pro">
               Join Pro Waitlist
-            </Link>
-          </div>
+            </PillButton>
+          </PillGroup>
         </motion.div>
       </section>
 
