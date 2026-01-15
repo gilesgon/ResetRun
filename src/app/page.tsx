@@ -246,7 +246,7 @@ export default function LandingPage() {
         >
           <h2 className={`${typo.h2} mb-8 text-center`}>The Moment</h2>
           
-          <ul className={`${layout.sectionSpacing} mb-8`}>
+          <ul className={`${layout.sectionSpacing} mb-8 text-center`}>
             <li className={`${typo.body} text-white/70`}>47 tabs, 12 notifications, endless scroll.</li>
             <li className={`${typo.body} text-white/70`}>You know what to do, but can't begin.</li>
             <li className={`${typo.body} text-white/70`}>Shoulders up, breath shallow, stuck.</li>
@@ -532,4 +532,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
