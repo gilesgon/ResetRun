@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { onAuthStateChanged } from 'firebase/auth'
-import { getFirebaseAuth } from '@/lib/firebase'
 import AuthenticatedHome from '@/components/authenticated-home'
+import { useProfile } from '@/components/profile-context'
 
 /**
  * /app route - Dashboard for authenticated users
@@ -12,27 +11,24 @@ import AuthenticatedHome from '@/components/authenticated-home'
  */
 export default function AppPage() {
   const router = useRouter()
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const { user, profile, loading, authChecked } = useProfile()
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    const auth = getFirebaseAuth()
-    if (!auth) {
-      // No auth available, redirect to landing
+    if (!authChecked) return
+    if (!user) {
       router.replace('/')
       return
     }
-    const unsub = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setIsAuthenticated(true)
-      } else {
-        // Not authenticated, redirect to landing
-        router.replace('/')
-      }
-    })
-    return () => unsub()
-  }, [router])
+    if (loading) return
+    if (!profile?.onboardingComplete) {
+      router.replace('/setup')
+      return
+    }
+    setReady(true)
+  }, [authChecked, loading, profile, router, user])
 
-  if (isAuthenticated === null) {
+  if (!authChecked || loading || !user || !ready) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-white/60">Loading...</div>

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Wind, Target, Sparkles, Dumbbell, TrendingUp, Zap, Lock } from 'lucide-react'
 import { loadStore, type Store } from '@/lib/storage'
 import { type Mode, modeNames, modeColors } from '@/lib/protocols'
+import { useProfile } from '@/components/profile-context'
 
 const MODE_META: Record<Mode, { icon: any; tagline: string }> = {
   calm: { icon: Wind, tagline: 'Regain composure' },
@@ -17,11 +18,16 @@ const DURATIONS = [2, 5, 10] as const
 
 export default function AuthenticatedHome() {
   const [store, setStore] = useState<Store | null>(null)
+  const { profile } = useProfile()
 
   useEffect(() => {
+    if (profile?.runState) {
+      setStore(profile.runState)
+      return
+    }
     const s = loadStore()
     setStore(s)
-  }, [])
+  }, [profile])
 
   if (!store) {
     return (

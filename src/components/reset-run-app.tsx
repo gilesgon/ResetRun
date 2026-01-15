@@ -3,10 +3,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Wind, Target, Sparkles, Dumbbell, Check, Share2, Pause, Play, X } from 'lucide-react'
 import confetti from 'canvas-confetti'
-import { onAuthStateChanged } from 'firebase/auth'
-import { getFirebaseAuth } from '@/lib/firebase'
 import { getProtocol, type Mode, type Duration, modeNames, modeColors } from '@/lib/protocols'
 import { useSettings } from '@/components/settings-context'
+import { useProfile } from '@/components/profile-context'
 import {
   getLocalDateKey,
   getDayIndex,
@@ -55,7 +54,6 @@ export default function ResetRunApp() {
   const [resetStep, setResetStep] = useState<'idle' | 'confirm' | 'typing'>('idle')
   const [resetText, setResetText] = useState('')
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [goals, setGoals] = useState<UserGoals | null>(null)
   const [draftGoals, setDraftGoals] = useState<UserGoals | null>(null)
 
@@ -69,24 +67,18 @@ export default function ResetRunApp() {
   const [seconds, setSeconds] = useState(0)
   const [paused, setPaused] = useState(false)
 
-  // Check authentication status
-  useEffect(() => {
-    const auth = getFirebaseAuth()
-    if (!auth) {
-      setIsAuthenticated(false)
-      return
-    }
-    const unsub = onAuthStateChanged(auth, (user) => {
-      setIsAuthenticated(!!user)
-    })
-    return () => unsub()
-  }, [])
+  const { user, profile, updateProfile } = useProfile()
+  const isAuthenticated = !!user
 
   // Load store once
   useEffect(() => {
+    if (profile?.runState) {
+      setStore(profile.runState)
+      return
+    }
     const s = loadStore()
     setStore(s)
-  }, [])
+  }, [profile])
 
   // If store hasn't arrived after a short delay, show a fallback CTA
   useEffect(() => {
@@ -98,13 +90,20 @@ export default function ResetRunApp() {
 
   // Apply saved onboarding defaults (ONLY for authenticated users)
   useEffect(() => {
+    if (profile?.preferences) {
+      setGoals(profile.preferences)
+      setDraftGoals(profile.preferences)
+      if (profile.preferences.preferredModes?.[0]) setMode(profile.preferences.preferredModes[0])
+      if (profile.preferences.preferredDuration) setDuration(profile.preferences.preferredDuration)
+      return
+    }
     const g = loadGoals(isAuthenticated)
     setGoals(g)
     setDraftGoals(g)
     if (!g) return
     if (g.preferredModes?.[0]) setMode(g.preferredModes[0])
     if (g.preferredDuration) setDuration(g.preferredDuration)
-  }, [isAuthenticated])
+  }, [isAuthenticated, profile])
 
   useEffect(() => {
     if (goals) setDraftGoals(goals)
@@ -113,8 +112,19 @@ export default function ResetRunApp() {
   useEffect(() => {
     if (!store || !goals) return
     const updated = updateDailyGoal(store, goals.dailyResets)
-    if (updated !== store) setStore(updated)
-  }, [store, goals])
+    if (updated !== store) {
+      setStore(updated)
+      if (isAuthenticated) {
+        updateProfile({
+          runState: updated,
+          locks: {
+            dailyLockDate: updated.settingsLockedForDate ?? null,
+            runLockUntil: null,
+          },
+        })
+      }
+    }
+  }, [store, goals, isAuthenticated, updateProfile])
 
   useEffect(() => {
     if (!store || screen !== 'player') return
@@ -122,9 +132,19 @@ export default function ResetRunApp() {
     const lockedToday =
       store.settingsLockedForDate === todayKey || store.lastSettingsChangeDate === todayKey
     if (!lockedToday) {
-      setStore(lockSettingsForToday(store))
+      const updated = lockSettingsForToday(store)
+      setStore(updated)
+      if (isAuthenticated) {
+        updateProfile({
+          runState: updated,
+          locks: {
+            dailyLockDate: updated.settingsLockedForDate ?? null,
+            runLockUntil: null,
+          },
+        })
+      }
     }
-  }, [store, screen])
+  }, [store, screen, isAuthenticated, updateProfile])
 
   useEffect(() => {
     if (showSettings) return
@@ -163,7 +183,17 @@ export default function ResetRunApp() {
       const lockedToday =
         store.settingsLockedForDate === todayKey || store.lastSettingsChangeDate === todayKey
       if (!lockedToday) {
-        setStore(lockSettingsForToday(store))
+        const updated = lockSettingsForToday(store)
+        setStore(updated)
+        if (isAuthenticated) {
+          updateProfile({
+            runState: updated,
+            locks: {
+              dailyLockDate: updated.settingsLockedForDate ?? null,
+              runLockUntil: null,
+            },
+          })
+        }
       }
     }
     setMode(m)
@@ -229,6 +259,15 @@ export default function ResetRunApp() {
     }
     const result = recordCompletion(store, true)
     setStore(result.store)
+    if (isAuthenticated) {
+      updateProfile({
+        runState: result.store,
+        locks: {
+          dailyLockDate: result.store.settingsLockedForDate ?? null,
+          runLockUntil: null,
+        },
+      })
+    }
     setCompletionNotice(result.alreadyCompletedToday ? 'Completed for today.' : null)
     setScreen('done')
     if (result.hitDaySeven) {
@@ -611,6 +650,17 @@ export default function ResetRunApp() {
                   let updatedStore = updateDailyGoal(store, updatedGoals.dailyResets)
                   updatedStore = lockSettingsForToday(updatedStore)
                   setStore(updatedStore)
+                  if (isAuthenticated) {
+                    updateProfile({
+                      onboardingComplete: true,
+                      preferences: updatedGoals,
+                      runState: updatedStore,
+                      locks: {
+                        dailyLockDate: updatedStore.settingsLockedForDate ?? null,
+                        runLockUntil: null,
+                      },
+                    })
+                  }
                 }}
                 disabled={settingsDisabled || !hasAtLeastOneMode}
                 className={`w-full mt-6 py-3 font-bold rounded-xl transition-colors ${
@@ -672,6 +722,15 @@ export default function ResetRunApp() {
                         if (!store || resetText !== 'RESET') return
                         const updated = resetRun(store)
                         setStore(updated)
+                        if (isAuthenticated) {
+                          updateProfile({
+                            runState: updated,
+                            locks: {
+                              dailyLockDate: updated.settingsLockedForDate ?? null,
+                              runLockUntil: null,
+                            },
+                          })
+                        }
                         setScreen('home')
                         setCompletionNotice(null)
                         setResetStep('idle')

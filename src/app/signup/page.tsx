@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Wind, Target, Sparkles, Dumbbell, Check } from 'lucide-react';
 import Link from 'next/link';
-import { onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirebaseAuth, firebaseConfigError } from '@/lib/firebase';
 import { getFirebaseUnavailableMessage } from '@/lib/env';
 import { Mode, Duration, modeNames } from '@/lib/protocols';
-import { saveGoals, UserGoals } from '@/lib/storage';
+import { loadStore, saveGoals, UserGoals } from '@/lib/storage';
+import { useProfile } from '@/components/profile-context';
 
 const modeIcons: Record<Mode, typeof Wind> = {
   calm: Wind,
@@ -30,6 +30,7 @@ type Step = typeof steps[number];
 
 export default function SignupPage() {
   const router = useRouter();
+  const { user, profile, authChecked, loading: profileLoading, updateProfile } = useProfile();
   const [authReady, setAuthReady] = useState(false);
   const [currentStep, setCurrentStep] = useState<Step>('modes');
   const [selectedModes, setSelectedModes] = useState<Mode[]>([]);
@@ -38,17 +39,18 @@ export default function SignupPage() {
 
   // Require login before onboarding
   useEffect(() => {
-    const firebaseAuth = getFirebaseAuth();
-    if (!firebaseAuth) return;
-    const unsub = onAuthStateChanged(firebaseAuth, (u: User | null) => {
-      if (!u) {
-        router.replace('/login?next=/signup');
-        return;
-      }
-      setAuthReady(true);
-    });
-    return () => unsub();
-  }, [router]);
+    if (!authChecked) return;
+    if (!user) {
+      router.replace('/login?next=/setup');
+      return;
+    }
+    if (profileLoading) return;
+    if (profile?.onboardingComplete) {
+      router.replace('/app');
+      return;
+    }
+    setAuthReady(true);
+  }, [authChecked, profile, profileLoading, router, user]);
 
   if (firebaseConfigError || !getFirebaseAuth()) {
     const fallback = getFirebaseUnavailableMessage();
@@ -102,7 +104,7 @@ export default function SignupPage() {
     if (prev) setCurrentStep(prev);
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     const goals: UserGoals = {
       dailyResets,
       preferredModes: selectedModes,
@@ -110,6 +112,16 @@ export default function SignupPage() {
       reminderTime: null,
     };
     saveGoals(goals);
+    const runState = loadStore();
+    await updateProfile({
+      onboardingComplete: true,
+      preferences: goals,
+      runState,
+      locks: {
+        dailyLockDate: runState.settingsLockedForDate ?? null,
+        runLockUntil: null,
+      },
+    });
     router.push('/app');
   };
 

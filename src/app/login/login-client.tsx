@@ -1,12 +1,12 @@
 'use client'
 
 // This file is intentionally a Client Component.
-// It uses next/navigation hooks (useRouter/useSearchParams) and Firebase Auth,
+// It uses next/navigation hooks and Firebase Auth,
 // both of which are browser/runtime concerns and should not execute during
 // server-side prerender in CI/Cloud Build.
 
-import { useEffect, useMemo, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 import {
@@ -14,21 +14,15 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
-  onAuthStateChanged,
-  type User,
 } from 'firebase/auth'
 import { Eye, EyeOff } from 'lucide-react'
 import { getFirebaseAuth, firebaseConfigError } from '@/lib/firebase'
 import { getFirebaseUnavailableMessage } from '@/lib/env'
+import { useProfile } from '@/components/profile-context'
 
 export default function LoginClient() {
   const router = useRouter()
-  const search = useSearchParams()
-
-  const next = useMemo(() => {
-    const n = search.get('next')
-    return n && n.startsWith('/') ? n : '/signup'
-  }, [search])
+  const { user, profile, loading: profileLoading, authChecked } = useProfile()
 
   const [ready, setReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -39,17 +33,18 @@ export default function LoginClient() {
   const [emailMode, setEmailMode] = useState<'signup' | 'signin'>('signup')
 
   useEffect(() => {
-    const firebaseAuth = getFirebaseAuth()
-    if (!firebaseAuth) return
-    const unsub = onAuthStateChanged(firebaseAuth, (u: User | null) => {
-      if (u) {
-        router.replace(next)
-        return
-      }
+    if (!authChecked) return
+    if (!user) {
       setReady(true)
-    })
-    return () => unsub()
-  }, [router, next])
+      return
+    }
+    if (profileLoading) return
+    if (profile?.onboardingComplete) {
+      router.replace('/app')
+    } else {
+      router.replace('/setup')
+    }
+  }, [authChecked, profile, profileLoading, router, user])
 
   async function loginWithGoogle() {
     setError(null)
@@ -57,7 +52,6 @@ export default function LoginClient() {
     if (!firebaseAuth) return
     const provider = new GoogleAuthProvider()
     await signInWithPopup(firebaseAuth, provider)
-    router.replace(next)
   }
 
   async function submitEmailAuth() {
@@ -83,7 +77,6 @@ export default function LoginClient() {
 
       try {
         await createUserWithEmailAndPassword(firebaseAuth, trimmedEmail, password)
-        router.replace(next)
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to create account.'
         setError(message)
@@ -98,7 +91,6 @@ export default function LoginClient() {
 
     try {
       await signInWithEmailAndPassword(firebaseAuth, trimmedEmail, password)
-      router.replace(next)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to sign in.'
       setError(message)
@@ -125,7 +117,7 @@ export default function LoginClient() {
     )
   }
 
-  if (!ready) {
+  if (!ready || (user && profileLoading)) {
     return (
       <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6 gap-6">
         <div className="text-white/60">Loading account…</div>

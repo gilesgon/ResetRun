@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Wind, Target, Sparkles, Dumbbell } from 'lucide-react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
-import { getFirebaseDb, getFirebaseAuth, firebaseConfigError } from '@/lib/firebase';
-import AuthenticatedHome from '@/components/authenticated-home';
+import { getFirebaseDb, firebaseConfigError } from '@/lib/firebase';
 import { layout, type as typo, surface, ui, modeColors, motionVariants } from '@/lib/brand';
 import PillButton from '@/components/ui/PillButton';
 import PillGroup from '@/components/ui/PillGroup';
+import { useProfile } from '@/components/profile-context';
 
 const modes = [
   {
@@ -44,8 +44,8 @@ const modes = [
 ];
 
 export default function LandingPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authChecked, setAuthChecked] = useState(false);
+  const router = useRouter();
+  const { user, profile, loading, authChecked } = useProfile();
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -54,19 +54,16 @@ export default function LandingPage() {
   const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Check authentication status
   useEffect(() => {
-    const auth = getFirebaseAuth();
-    if (!auth) {
-      setAuthChecked(true);
-      return;
+    if (!authChecked) return;
+    if (!user) return;
+    if (loading) return;
+    if (profile?.onboardingComplete) {
+      router.replace('/app');
+    } else {
+      router.replace('/setup');
     }
-    const unsub = onAuthStateChanged(auth, (user) => {
-      setIsAuthenticated(!!user);
-      setAuthChecked(true);
-    });
-    return () => unsub();
-  }, []);
+  }, [authChecked, loading, profile, router, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,7 +122,7 @@ export default function LandingPage() {
   };
 
   // Show loading state while checking auth
-  if (!authChecked) {
+  if (!authChecked || (user && loading)) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-white/60">Loading...</div>
@@ -133,9 +130,12 @@ export default function LandingPage() {
     );
   }
 
-  // Show authenticated home for logged-in users
-  if (isAuthenticated) {
-    return <AuthenticatedHome />;
+  if (user) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-white/60">Loading...</div>
+      </div>
+    );
   }
 
   // Show landing page for guests
@@ -217,7 +217,7 @@ export default function LandingPage() {
             <PillButton variant="solid" href="#modes">
               Try Free Demo
             </PillButton>
-            <PillButton variant="subtle" href="/login?next=/signup">
+            <PillButton variant="subtle" href="/login?next=/setup">
               Create Account
             </PillButton>
             <PillButton variant="subtle" href="/#pro">
@@ -511,7 +511,7 @@ export default function LandingPage() {
             <PillButton variant="solid" href="/app">
               Try Free Demo
             </PillButton>
-            <PillButton variant="subtle" href="/login?next=/signup">
+            <PillButton variant="subtle" href="/login?next=/setup">
               Create Account
             </PillButton>
             <PillButton variant="subtle" href="/#pro">
@@ -532,8 +532,4 @@ export default function LandingPage() {
     </div>
   );
 }
-
-
-
-
 
