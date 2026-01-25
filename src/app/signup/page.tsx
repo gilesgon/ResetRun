@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Wind, Target, Sparkles, Dumbbell, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Wind, Target, Sparkles, Dumbbell, Check, Hourglass } from 'lucide-react';
 import Link from 'next/link';
 import { getFirebaseAuth, firebaseConfigError } from '@/lib/firebase';
 import { getFirebaseUnavailableMessage } from '@/lib/env';
@@ -16,6 +16,7 @@ const modeIcons: Record<Mode, typeof Wind> = {
   focus: Target,
   clean: Sparkles,
   body: Dumbbell,
+  timeout: Hourglass,
 };
 
 const modeDescriptions: Record<Mode, string> = {
@@ -23,6 +24,7 @@ const modeDescriptions: Record<Mode, string> = {
   focus: 'Clear mental clutter',
   clean: 'Organize your space',
   body: 'Move your energy',
+  timeout: 'Cool down & Reset',
 };
 
 const steps = ['modes', 'frequency', 'duration', 'confirm'] as const;
@@ -170,7 +172,7 @@ export default function SignupPage() {
               <p className="text-gray-400 mb-8">Pick the modes you'll use most. You can always change this.</p>
 
               <div className="grid grid-cols-1 gap-3">
-                {(['calm', 'focus', 'clean', 'body'] as Mode[]).map((mode) => {
+                {(['calm', 'focus', 'clean', 'body', 'timeout'] as Mode[]).map((mode) => {
                   const Icon = modeIcons[mode];
                   const isSelected = selectedModes.includes(mode);
 
@@ -178,11 +180,10 @@ export default function SignupPage() {
                     <button
                       key={mode}
                       onClick={() => toggleMode(mode)}
-                      className={`tap-target mode-${mode} p-5 rounded-xl border text-left flex items-center gap-4 transition-all ${
-                        isSelected
+                      className={`tap-target mode-${mode} p-5 rounded-xl border text-left flex items-center gap-4 transition-all ${isSelected
                           ? 'border-white'
                           : 'border-gray-800 opacity-60'
-                      }`}
+                        }`}
                     >
                       <Icon className="w-6 h-6 shrink-0" />
                       <div className="flex-1">
@@ -218,11 +219,10 @@ export default function SignupPage() {
                   <button
                     key={num}
                     onClick={() => setDailyResets(num)}
-                    className={`tap-target p-5 rounded-xl border text-left transition-all ${
-                      dailyResets === num
+                    className={`tap-target p-5 rounded-xl border text-left transition-all ${dailyResets === num
                         ? 'border-white bg-white/5'
                         : 'border-gray-800'
-                    }`}
+                      }`}
                   >
                     <div className="font-semibold text-lg">
                       {num} reset{num > 1 ? 's' : ''} per day
@@ -255,11 +255,10 @@ export default function SignupPage() {
                   <button
                     key={dur}
                     onClick={() => setPreferredDuration(dur)}
-                    className={`tap-target p-5 rounded-xl border text-left transition-all ${
-                      preferredDuration === dur
+                    className={`tap-target p-5 rounded-xl border text-left transition-all ${preferredDuration === dur
                         ? 'border-white bg-white/5'
                         : 'border-gray-800'
-                    }`}
+                      }`}
                   >
                     <div className="font-semibold text-lg">{dur} minutes</div>
                     <div className="text-sm text-gray-400">
@@ -339,11 +338,10 @@ export default function SignupPage() {
           <button
             onClick={nextStep}
             disabled={!canContinue}
-            className={`tap-target w-full py-4 font-bold rounded-full text-lg flex items-center justify-center gap-2 transition-all ${
-              canContinue
+            className={`tap-target w-full py-4 font-bold rounded-full text-lg flex items-center justify-center gap-2 transition-all ${canContinue
                 ? 'bg-white text-black active:scale-95'
                 : 'bg-gray-800 text-gray-500 cursor-not-allowed'
-            }`}
+              }`}
           >
             Continue
             <ChevronRight className="w-5 h-5" />

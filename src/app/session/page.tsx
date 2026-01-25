@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Wind, Target, Sparkles, Dumbbell, Share2, Pause, Play, X } from 'lucide-react'
+import { Wind, Target, Sparkles, Dumbbell, Share2, Pause, Play, X, Hourglass } from 'lucide-react'
 import confetti from 'canvas-confetti'
 import { onAuthStateChanged } from 'firebase/auth'
 import { getFirebaseAuth } from '@/lib/firebase'
@@ -22,6 +22,7 @@ const MODE_META: Record<Mode, { icon: any }> = {
   focus: { icon: Target },
   clean: { icon: Sparkles },
   body: { icon: Dumbbell },
+  timeout: { icon: Hourglass },
 }
 
 function formatTime(s: number) {

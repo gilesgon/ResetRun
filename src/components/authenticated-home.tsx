@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Wind, Target, Sparkles, Dumbbell, TrendingUp, Zap, Lock } from 'lucide-react'
+import { Wind, Target, Sparkles, Dumbbell, TrendingUp, Zap, Lock, Hourglass } from 'lucide-react'
 import { loadStore, type Store } from '@/lib/storage'
 import { type Mode, modeNames, modeColors } from '@/lib/protocols'
 import { useProfile } from '@/components/profile-context'
@@ -12,6 +12,7 @@ const MODE_META: Record<Mode, { icon: any; tagline: string }> = {
   focus: { icon: Target, tagline: 'Lock in' },
   clean: { icon: Sparkles, tagline: 'Clear space' },
   body: { icon: Dumbbell, tagline: 'Move energy' },
+  timeout: { icon: Hourglass, tagline: 'Cool down' },
 }
 
 const DURATIONS = [2, 5, 10] as const

@@ -71,6 +71,11 @@ export const modeColors = {
     class: 'mode-body',
     iconBg: 'bg-[#ff4d7a]',
   },
+  timeout: {
+    gradient: 'from-[#1e1b4b] to-[#312e81]',
+    class: 'mode-timeout',
+    iconBg: 'bg-[#6366f1]',
+  },
 } as const
 
 // Framer motion shared animation variants

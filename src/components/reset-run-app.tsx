@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Wind, Target, Sparkles, Dumbbell, Check, Share2, Pause, Play, X } from 'lucide-react'
+import { Wind, Target, Sparkles, Dumbbell, Check, Share2, Pause, Play, X, Hourglass } from 'lucide-react'
 import confetti from 'canvas-confetti'
 import { getProtocol, type Mode, type Duration, modeNames, modeColors } from '@/lib/protocols'
 import { useSettings } from '@/components/settings-context'
@@ -27,6 +27,7 @@ const MODE_META: Record<Mode, { icon: any; tagline: string }> = {
   focus: { icon: Target, tagline: 'Lock in' },
   clean: { icon: Sparkles, tagline: 'Clear space' },
   body: { icon: Dumbbell, tagline: 'Move energy' },
+  timeout: { icon: Hourglass, tagline: 'Cool down' },
 }
 
 const DURATIONS: Duration[] = [2, 5, 10]
@@ -368,9 +369,8 @@ export default function ResetRunApp() {
                 return (
                   <div
                     key={n}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                      ok ? 'bg-white text-black' : 'border border-white/20 text-white/30'
-                    }`}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${ok ? 'bg-white text-black' : 'border border-white/20 text-white/30'
+                      }`}
                   >
                     {ok ? <Check className="w-4 h-4" /> : '○'}
                   </div>
@@ -398,11 +398,10 @@ export default function ResetRunApp() {
                         <button
                           key={d}
                           onClick={() => startRun(m, d)}
-                          className={`flex-1 rounded-xl border py-3 text-sm font-semibold transition-colors ${
-                            preferredDur === d
-                              ? 'border-white bg-white text-black'
-                              : 'border-white/15 bg-white/5 hover:bg-white/10'
-                          }`}
+                          className={`flex-1 rounded-xl border py-3 text-sm font-semibold transition-colors ${preferredDur === d
+                            ? 'border-white bg-white text-black'
+                            : 'border-white/15 bg-white/5 hover:bg-white/10'
+                            }`}
                         >
                           {d} min
                         </button>
@@ -477,15 +476,15 @@ export default function ResetRunApp() {
                   <Share2 className="w-5 h-5" />
                   Copy Link
                 </button>
-              <button
-                onClick={() => {
-                  setCompletionNotice(null)
-                  setScreen('home')
-                }}
-                className="w-full py-4 font-semibold border border-white/40 text-white"
-              >
-                Done
-              </button>
+                <button
+                  onClick={() => {
+                    setCompletionNotice(null)
+                    setScreen('home')
+                  }}
+                  className="w-full py-4 font-semibold border border-white/40 text-white"
+                >
+                  Done
+                </button>
               </div>
             </div>
           </div>
@@ -523,9 +522,8 @@ export default function ResetRunApp() {
                       return (
                         <label
                           key={m}
-                          className={`flex items-center gap-3 p-3 rounded-xl border border-white/10 transition-colors ${
-                            settingsDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/5 cursor-pointer'
-                          }`}
+                          className={`flex items-center gap-3 p-3 rounded-xl border border-white/10 transition-colors ${settingsDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/5 cursor-pointer'
+                            }`}
                         >
                           <input
                             type="checkbox"
@@ -586,13 +584,12 @@ export default function ResetRunApp() {
                           }
                           setDraftGoals(updatedGoals)
                         }}
-                        className={`flex-1 py-3 rounded-xl font-semibold transition-colors ${
-                          settingsDisabled
-                            ? 'border border-white/10 bg-white/5 text-white/40 cursor-not-allowed'
-                            : (editableGoals.dailyResets ?? 1) === num
-                              ? 'bg-white text-black'
-                              : 'border border-white/15 bg-white/5 hover:bg-white/10'
-                        }`}
+                        className={`flex-1 py-3 rounded-xl font-semibold transition-colors ${settingsDisabled
+                          ? 'border border-white/10 bg-white/5 text-white/40 cursor-not-allowed'
+                          : (editableGoals.dailyResets ?? 1) === num
+                            ? 'bg-white text-black'
+                            : 'border border-white/15 bg-white/5 hover:bg-white/10'
+                          }`}
                       >
                         {num} reset{num > 1 ? 's' : ''}
                       </button>
@@ -616,13 +613,12 @@ export default function ResetRunApp() {
                           }
                           setDraftGoals(updatedGoals)
                         }}
-                        className={`flex-1 py-3 rounded-xl font-semibold transition-colors ${
-                          settingsDisabled
-                            ? 'border border-white/10 bg-white/5 text-white/40 cursor-not-allowed'
-                            : (editableGoals.preferredDuration ?? 5) === d
-                              ? 'bg-white text-black'
-                              : 'border border-white/15 bg-white/5 hover:bg-white/10'
-                        }`}
+                        className={`flex-1 py-3 rounded-xl font-semibold transition-colors ${settingsDisabled
+                          ? 'border border-white/10 bg-white/5 text-white/40 cursor-not-allowed'
+                          : (editableGoals.preferredDuration ?? 5) === d
+                            ? 'bg-white text-black'
+                            : 'border border-white/15 bg-white/5 hover:bg-white/10'
+                          }`}
                       >
                         {d} min
                       </button>
@@ -663,11 +659,10 @@ export default function ResetRunApp() {
                   }
                 }}
                 disabled={settingsDisabled || !hasAtLeastOneMode}
-                className={`w-full mt-6 py-3 font-bold rounded-xl transition-colors ${
-                  settingsDisabled || !hasAtLeastOneMode
-                    ? 'bg-white/10 text-white/40 cursor-not-allowed'
-                    : 'bg-white text-black hover:bg-gray-200'
-                }`}
+                className={`w-full mt-6 py-3 font-bold rounded-xl transition-colors ${settingsDisabled || !hasAtLeastOneMode
+                  ? 'bg-white/10 text-white/40 cursor-not-allowed'
+                  : 'bg-white text-black hover:bg-gray-200'
+                  }`}
               >
                 Lock in for Today
               </button>
@@ -738,11 +733,10 @@ export default function ResetRunApp() {
                         closeSettings()
                       }}
                       disabled={resetText !== 'RESET'}
-                      className={`w-full py-3 font-semibold rounded-xl transition-colors ${
-                        resetText === 'RESET'
-                          ? 'bg-red-500 text-white hover:bg-red-600'
-                          : 'bg-red-500/30 text-white/40 cursor-not-allowed'
-                      }`}
+                      className={`w-full py-3 font-semibold rounded-xl transition-colors ${resetText === 'RESET'
+                        ? 'bg-red-500 text-white hover:bg-red-600'
+                        : 'bg-red-500/30 text-white/40 cursor-not-allowed'
+                        }`}
                     >
                       Start over
                     </button>

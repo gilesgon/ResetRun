@@ -1,4 +1,4 @@
-export type Mode = 'calm' | 'focus' | 'clean' | 'body';
+export type Mode = 'calm' | 'focus' | 'clean' | 'body' | 'timeout';
 export type Duration = 2 | 5 | 10;
 
 export interface Step {
@@ -151,6 +151,39 @@ export const protocols: Protocol[] = [
       { title: 'Child\'s Pose', instruction: 'Knees wide, reach forward, rest.', duration: 120 },
     ],
   },
+  // TIMEOUT - 2 min (Cool Down)
+  {
+    mode: 'timeout',
+    duration: 2,
+    steps: [
+      { title: 'Stop', instruction: 'Stop what you are doing. Step away.', duration: 30 },
+      { title: 'Breathe', instruction: 'Big deep breath. Blow out the candles.', duration: 45 },
+      { title: 'Count', instruction: 'Count to 10 slowly. 1... 2... 3...', duration: 45 },
+    ],
+  },
+  // TIMEOUT - 5 min (Reflect)
+  {
+    mode: 'timeout',
+    duration: 5,
+    steps: [
+      { title: 'Space', instruction: 'Find a quiet spot. Sit down.', duration: 60 },
+      { title: 'Download', instruction: 'What are you feeling? Mad? Sad? Say it.', duration: 90 },
+      { title: 'Breathe', instruction: 'In through nose, out through mouth. Slow.', duration: 90 },
+      { title: 'Reset', instruction: 'Shake it off. Ready to try again?', duration: 60 },
+    ],
+  },
+  // TIMEOUT - 10 min (Restore)
+  {
+    mode: 'timeout',
+    duration: 10,
+    steps: [
+      { title: 'Disconnect', instruction: 'Go to a different room. lay down if you can.', duration: 60 },
+      { title: 'Big Breaths', instruction: 'Fill your belly like a balloon. Let it out slowly.', duration: 120 },
+      { title: 'Feelings Check', instruction: 'Where is the anger in your body? Let it melt.', duration: 120 },
+      { title: 'Quiet Time', instruction: 'Just rest. Nothing to do right now.', duration: 180 },
+      { title: 'Return', instruction: 'Stand up slowly. You are in control.', duration: 120 },
+    ],
+  },
 ];
 
 export function getProtocol(mode: Mode, duration: Duration): Protocol | undefined {
@@ -162,6 +195,7 @@ export const modeColors: Record<Mode, { from: string; to: string; solid: string 
   focus: { from: 'from-[#3a2912]', to: 'to-[#5a3a12]', solid: 'bg-[#f59e0b]' },
   clean: { from: 'from-[#0f2f2a]', to: 'to-[#0f3a34]', solid: 'bg-[#28d7a2]' },
   body: { from: 'from-[#3a1822]', to: 'to-[#4a1f2d]', solid: 'bg-[#ff4d7a]' },
+  timeout: { from: 'from-[#1e1b4b]', to: 'to-[#312e81]', solid: 'bg-[#6366f1]' }, // Indigo/Violet
 };
 
 export const modeNames: Record<Mode, string> = {
@@ -169,6 +203,7 @@ export const modeNames: Record<Mode, string> = {
   focus: 'Focus',
   clean: 'Clean',
   body: 'Body',
+  timeout: 'Timeout',
 };
 
 export const completionMessages = [
@@ -189,7 +224,7 @@ export function getRandomCompletionMessage(): string {
 }
 
 export const DURATIONS: Duration[] = [2, 5, 10]
-export const MODES: Mode[] = ['calm', 'focus', 'clean', 'body']
+export const MODES: Mode[] = ['calm', 'focus', 'clean', 'body', 'timeout']
 
 export function isMode(x: any): x is Mode {
   return MODES.includes(x)

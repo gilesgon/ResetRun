@@ -72,6 +72,10 @@ body {
   background: linear-gradient(135deg, var(--body-from), var(--body-to));
 }
 
+.mode-timeout {
+  background: linear-gradient(135deg, #1e1b4b, #312e81);
+}
+
 .player.calm {
   background: var(--gradient-calm);
 }
@@ -86,6 +90,10 @@ body {
 
 .player.body {
   background: var(--gradient-body);
+}
+
+.player.timeout {
+  background: linear-gradient(90deg, #1e1b4b, #312e81);
 }
 
 /* Tap feedback for mobile */

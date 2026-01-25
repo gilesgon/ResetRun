@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Wind, Target, Sparkles, Dumbbell, Play } from 'lucide-react';
+import { Wind, Target, Sparkles, Dumbbell, Play, Hourglass } from 'lucide-react';
 import Link from 'next/link';
 import { Mode, Duration, modeNames, getProtocol } from '@/lib/protocols';
 
@@ -12,6 +12,7 @@ const modeIcons: Record<Mode, typeof Wind> = {
   focus: Target,
   clean: Sparkles,
   body: Dumbbell,
+  timeout: Hourglass,
 };
 
 export default function SharedResetPage() {
@@ -22,14 +23,14 @@ export default function SharedResetPage() {
 
   useEffect(() => {
     const slugRaw = params.slug
-const slug = Array.isArray(slugRaw) ? slugRaw[0] : slugRaw
-if (!slug) return
+    const slug = Array.isArray(slugRaw) ? slugRaw[0] : slugRaw
+    if (!slug) return
 
     if (!slug) return;
 
     // Parse slug: "calm-5" -> mode: calm, duration: 5
     const [modeStr, durationStr] = slug.split('-');
-    const validModes: Mode[] = ['calm', 'focus', 'clean', 'body'];
+    const validModes: Mode[] = ['calm', 'focus', 'clean', 'body', 'timeout'];
     const validDurations: Duration[] = [2, 5, 10];
 
     if (
