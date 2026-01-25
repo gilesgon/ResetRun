@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Wind, Target, Sparkles, Dumbbell, Check, Share2, Pause, Play, X, Hourglass } from 'lucide-react'
 import confetti from 'canvas-confetti'
-import { getProtocol, type Mode, type Duration, modeNames, modeColors } from '@/lib/protocols'
+import { getProtocol, isDuration, isMode, type Mode, type Duration, modeNames, modeColors } from '@/lib/protocols'
 import { useSettings } from '@/components/settings-context'
 import { useProfile } from '@/components/profile-context'
 import {
@@ -37,13 +37,6 @@ function formatTime(s: number) {
   const m = Math.floor(n / 60)
   const r = n % 60
   return `${m.toString().padStart(2, '0')}:${r.toString().padStart(2, '0')}`
-}
-
-function isMode(x: any): x is Mode {
-  return x === 'calm' || x === 'focus' || x === 'clean' || x === 'body'
-}
-function isDuration(x: any): x is Duration {
-  return x === 2 || x === 5 || x === 10
 }
 
 export default function ResetRunApp() {
@@ -750,7 +743,6 @@ export default function ResetRunApp() {
     </div>
   )
 }
-
 
 
 

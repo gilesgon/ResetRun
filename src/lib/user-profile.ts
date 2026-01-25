@@ -1,6 +1,6 @@
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { getFirebaseDb } from '@/lib/firebase'
-import { isDuration, isMode, type Duration, type Mode } from '@/lib/protocols'
+import { isDuration, isMode, upgradePreferredModes, type Duration, type Mode } from '@/lib/protocols'
 import {
   clearGoals,
   loadGoals,
@@ -47,7 +47,7 @@ export function buildProfileFromLocal(): UserProfile {
 function normalizePreferences(input: any, fallback: UserGoals | null): UserGoals | null {
   if (!input || typeof input !== 'object') return fallback
   const preferredModes = Array.isArray(input.preferredModes)
-    ? input.preferredModes.filter((m: any) => isMode(m))
+    ? upgradePreferredModes(input.preferredModes.filter((m: any) => isMode(m)))
     : []
   const preferredDuration: Duration | null = isDuration(input.preferredDuration)
     ? input.preferredDuration

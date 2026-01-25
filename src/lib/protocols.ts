@@ -156,9 +156,8 @@ export const protocols: Protocol[] = [
     mode: 'timeout',
     duration: 2,
     steps: [
-      { title: 'Stop', instruction: 'Stop what you are doing. Step away.', duration: 30 },
-      { title: 'Breathe', instruction: 'Big deep breath. Blow out the candles.', duration: 45 },
-      { title: 'Count', instruction: 'Count to 10 slowly. 1... 2... 3...', duration: 45 },
+      { title: 'Breathe', instruction: 'Slow inhale, slow exhale. Let your shoulders drop.', duration: 60 },
+      { title: 'Count', instruction: 'Count from 10 down to 1, steady and slow.', duration: 60 },
     ],
   },
   // TIMEOUT - 5 min (Reflect)
@@ -166,10 +165,9 @@ export const protocols: Protocol[] = [
     mode: 'timeout',
     duration: 5,
     steps: [
-      { title: 'Space', instruction: 'Find a quiet spot. Sit down.', duration: 60 },
-      { title: 'Download', instruction: 'What are you feeling? Mad? Sad? Say it.', duration: 90 },
-      { title: 'Breathe', instruction: 'In through nose, out through mouth. Slow.', duration: 90 },
-      { title: 'Reset', instruction: 'Shake it off. Ready to try again?', duration: 60 },
+      { title: 'Feelings', instruction: 'Name what you are feeling. No judgment.', duration: 90 },
+      { title: 'Deep Breaths', instruction: 'In through the nose, out through the mouth. Slow.', duration: 120 },
+      { title: 'Reset', instruction: 'Release tension. Decide your next small step.', duration: 90 },
     ],
   },
   // TIMEOUT - 10 min (Restore)
@@ -177,11 +175,10 @@ export const protocols: Protocol[] = [
     mode: 'timeout',
     duration: 10,
     steps: [
-      { title: 'Disconnect', instruction: 'Go to a different room. lay down if you can.', duration: 60 },
-      { title: 'Big Breaths', instruction: 'Fill your belly like a balloon. Let it out slowly.', duration: 120 },
-      { title: 'Feelings Check', instruction: 'Where is the anger in your body? Let it melt.', duration: 120 },
-      { title: 'Quiet Time', instruction: 'Just rest. Nothing to do right now.', duration: 180 },
-      { title: 'Return', instruction: 'Stand up slowly. You are in control.', duration: 120 },
+      { title: 'Settle', instruction: 'Find a comfortable position. Unclench your jaw.', duration: 90 },
+      { title: 'Long Calm', instruction: 'Slow breaths for a few minutes. Let the pace drop.', duration: 210 },
+      { title: 'Visualize', instruction: 'Picture a steady, positive outcome. See it clearly.', duration: 210 },
+      { title: 'Return', instruction: 'Open your eyes. Carry that calm with you.', duration: 90 },
     ],
   },
 ];
@@ -195,7 +192,7 @@ export const modeColors: Record<Mode, { from: string; to: string; solid: string 
   focus: { from: 'from-[#3a2912]', to: 'to-[#5a3a12]', solid: 'bg-[#f59e0b]' },
   clean: { from: 'from-[#0f2f2a]', to: 'to-[#0f3a34]', solid: 'bg-[#28d7a2]' },
   body: { from: 'from-[#3a1822]', to: 'to-[#4a1f2d]', solid: 'bg-[#ff4d7a]' },
-  timeout: { from: 'from-[#1e1b4b]', to: 'to-[#312e81]', solid: 'bg-[#6366f1]' }, // Indigo/Violet
+  timeout: { from: 'from-[#818CF8]', to: 'to-[#4F46E5]', solid: 'bg-[#818CF8]' }, // Indigo/Violet
 };
 
 export const modeNames: Record<Mode, string> = {
@@ -225,6 +222,7 @@ export function getRandomCompletionMessage(): string {
 
 export const DURATIONS: Duration[] = [2, 5, 10]
 export const MODES: Mode[] = ['calm', 'focus', 'clean', 'body', 'timeout']
+const LEGACY_MODES: Mode[] = ['calm', 'focus', 'clean', 'body']
 
 export function isMode(x: any): x is Mode {
   return MODES.includes(x)
@@ -232,6 +230,16 @@ export function isMode(x: any): x is Mode {
 
 export function isDuration(x: any): x is Duration {
   return DURATIONS.includes(x)
+}
+
+export function upgradePreferredModes(modes: Mode[]): Mode[] {
+  if (!modes.length) return modes
+  const unique = Array.from(new Set(modes))
+  const hasAllLegacy = LEGACY_MODES.every((mode) => unique.includes(mode))
+  if (!unique.includes('timeout') && hasAllLegacy && unique.length === LEGACY_MODES.length) {
+    return [...unique, 'timeout']
+  }
+  return unique
 }
 
 export function getProtocolSafe(mode: Mode, duration: Duration): Protocol {

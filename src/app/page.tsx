@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Wind, Target, Sparkles, Dumbbell } from 'lucide-react';
+import { Wind, Target, Sparkles, Dumbbell, Hourglass } from 'lucide-react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { getFirebaseDb, firebaseConfigError } from '@/lib/firebase';
 import { layout, type as typo, surface, ui, modeColors, motionVariants } from '@/lib/brand';
@@ -16,7 +16,7 @@ const modes = [
   {
     id: 'calm',
     name: 'Calm',
-    description: 'Reset your nervous system in 2–10 minutes',
+    description: 'Reset your nervous system in 2-10 minutes',
     icon: Wind,
     gradient: 'from-[#1a2148] to-[#2a2f64]',
   },
@@ -40,6 +40,13 @@ const modes = [
     description: 'Reboot energy with micro-movement',
     icon: Dumbbell,
     gradient: 'from-[#3a1822] to-[#4a1f2d]',
+  },
+  {
+    id: 'timeout',
+    name: 'Timeout',
+    description: 'Cool down and reset',
+    icon: Hourglass,
+    gradient: 'from-[#1e1b4b] to-[#312e81]',
   },
 ];
 
@@ -298,7 +305,7 @@ export default function LandingPage() {
         >
           <h2 className={`${typo.h2} mb-2 text-center`}>Pick a Reset</h2>
           <p className={`${typo.bodySm} text-center mb-12 text-white/60`}>
-            4 modes × 3 durations → guided steps with timers
+            5 modes x 3 durations -> guided steps with timers
           </p>
 
           <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">

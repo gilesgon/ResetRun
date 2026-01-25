@@ -72,9 +72,9 @@ export const modeColors = {
     iconBg: 'bg-[#ff4d7a]',
   },
   timeout: {
-    gradient: 'from-[#1e1b4b] to-[#312e81]',
+    gradient: 'from-[#818CF8] to-[#4F46E5]',
     class: 'mode-timeout',
-    iconBg: 'bg-[#6366f1]',
+    iconBg: 'bg-[#818CF8]',
   },
 } as const
 

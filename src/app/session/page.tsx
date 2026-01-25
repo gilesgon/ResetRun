@@ -6,7 +6,7 @@ import { Wind, Target, Sparkles, Dumbbell, Share2, Pause, Play, X, Hourglass } f
 import confetti from 'canvas-confetti'
 import { onAuthStateChanged } from 'firebase/auth'
 import { getFirebaseAuth } from '@/lib/firebase'
-import { getProtocol, type Mode, type Duration, modeNames } from '@/lib/protocols'
+import { getProtocol, isDuration, isMode, type Mode, type Duration, modeNames } from '@/lib/protocols'
 import {
   getLocalDateKey,
   lockSettingsForToday,
@@ -30,13 +30,6 @@ function formatTime(s: number) {
   const m = Math.floor(n / 60)
   const r = n % 60
   return `${m.toString().padStart(2, '0')}:${r.toString().padStart(2, '0')}`
-}
-
-function isMode(x: any): x is Mode {
-  return x === 'calm' || x === 'focus' || x === 'clean' || x === 'body'
-}
-function isDuration(x: any): x is Duration {
-  return x === 2 || x === 5 || x === 10
 }
 
 function SessionContent() {

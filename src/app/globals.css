@@ -22,10 +22,13 @@ html {
   --clean-to: #0f3a34;
   --body-from: #3a1822;
   --body-to: #4a1f2d;
+  --timeout-from: #818CF8;
+  --timeout-to: #4F46E5;
   --gradient-calm: linear-gradient(90deg, #1a2148, #2a2f64);
   --gradient-focus: linear-gradient(90deg, #3a2912, #5a3a12);
   --gradient-clean: linear-gradient(90deg, #0f2f2a, #0f3a34);
   --gradient-body: linear-gradient(90deg, #3a1822, #4a1f2d);
+  --gradient-timeout: linear-gradient(90deg, var(--timeout-from), var(--timeout-to));
   --brand-gradient: linear-gradient(90deg, #6366F1, #8B5CF6);
 }
 
@@ -73,7 +76,7 @@ body {
 }
 
 .mode-timeout {
-  background: linear-gradient(135deg, #1e1b4b, #312e81);
+  background: var(--gradient-timeout);
 }
 
 .player.calm {
@@ -93,7 +96,7 @@ body {
 }
 
 .player.timeout {
-  background: linear-gradient(90deg, #1e1b4b, #312e81);
+  background: var(--bg);
 }
 
 /* Tap feedback for mobile */

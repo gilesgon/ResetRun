@@ -1,4 +1,4 @@
-import { isDuration, isMode, type Duration, type Mode } from '@/lib/protocols'
+import { isDuration, isMode, upgradePreferredModes, type Duration, type Mode } from '@/lib/protocols'
 
 export type UserGoals = {
   dailyResets: number
@@ -252,7 +252,7 @@ export function saveGoals(goals: UserGoals) {
 
 /**
  * Load user goals (only use for authenticated users)
- * For guests, always return null to ensure all 4 modes are shown
+ * For guests, always return null to ensure all modes are shown
  */
 export function loadGoals(isAuthenticated: boolean = false): UserGoals | null {
   if (typeof window === 'undefined') return null
@@ -264,7 +264,7 @@ export function loadGoals(isAuthenticated: boolean = false): UserGoals | null {
   try {
     const parsed = JSON.parse(raw) as Partial<UserGoals>
     const preferredModes = Array.isArray(parsed.preferredModes)
-      ? parsed.preferredModes.filter(isMode)
+      ? upgradePreferredModes(parsed.preferredModes.filter(isMode))
       : []
     const preferredDuration = isDuration(parsed.preferredDuration) ? parsed.preferredDuration : null
 
